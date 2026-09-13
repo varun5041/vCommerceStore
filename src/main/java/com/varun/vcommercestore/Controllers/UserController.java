@@ -4,6 +4,7 @@ import com.varun.vcommercestore.Models.User;
 import com.varun.vcommercestore.Services.UserServices;
 import com.varun.vcommercestore.dtos.ApiResponseMessage;
 import com.varun.vcommercestore.dtos.userDto;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class UserController {
 
     //create
     @PostMapping("/create")
-    public ResponseEntity<userDto> createUser(@RequestBody userDto userdto){
+    public ResponseEntity<userDto> createUser(@Valid @RequestBody userDto userdto){
         userDto user = userService.createUser(userdto);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
@@ -27,7 +28,7 @@ public class UserController {
     // Update
     @PutMapping("/update/{userId}")
     public ResponseEntity<userDto> updateUser(
-            @RequestBody userDto userdto,
+            @Valid @RequestBody userDto userdto,
             @PathVariable String userId) {
 
         userDto updatedUser = userService.updateUser(userdto, userId);

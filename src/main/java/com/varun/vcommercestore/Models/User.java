@@ -19,27 +19,15 @@ import jakarta.validation.constraints.Size;
 public class User {
     @Id
     private String userId;
-
-    @NotBlank
     private String userName;
-
-    @Email
     @Column(nullable = false, unique = true, length = 100)
     private String userEmail;
-
     private String userPassword;
-
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private Gender userGender;
-
-    @Size(max = 255)
     private String userAddress;
-
-    @Size(max = 500)
     private String userAbout;
-
-    @Column(length = 500)
     private String profileImage;
 
 }
