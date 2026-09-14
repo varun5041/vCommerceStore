@@ -1,5 +1,6 @@
 package com.varun.vcommercestore.Services.UserServiceImpl;
 
+import com.varun.vcommercestore.Exceptions.ResourceNotFoundException;
 import com.varun.vcommercestore.Models.User;
 import com.varun.vcommercestore.Repositories.UserRepository;
 import com.varun.vcommercestore.Services.UserServices;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.ReadOnlyFileSystemException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,7 +37,7 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public userDto updateUser(userDto userdto, String userId) {
-        User user = userRepository.findById(userId).orElseThrow(()->new RuntimeException("user not found exception"));
+        User user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("USER NOT FOUND!"));
 
         user.setUserName(userdto.getUserName());
         user.setUserName(userdto.getUserName());
@@ -54,13 +56,13 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public void deleteUser(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found!"));
+        User user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("USER NOT FOUND!"));
         userRepository.delete(user);
     }
 
     @Override
     public userDto getUserById(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(()->new RuntimeException("USER NOT FOUND!"));
+        User user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("USER NOT FOUND!") );
         userDto userdto = entityToDto(user);
         return userdto;
     }
