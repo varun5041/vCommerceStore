@@ -40,10 +40,12 @@ public class UserController {
     @GetMapping("/getall")
     public ResponseEntity<List<userDto>> getAllUsers(
             @RequestParam(value = "pagenumber",defaultValue = "0",required = false) int pagenumber,
-            @RequestParam(value = "pagesize",defaultValue = "10",required = false)int pagesize
+            @RequestParam(value = "pagesize",defaultValue = "10",required = false)int pagesize,
+            @RequestParam(value = "sortby",defaultValue = "username",required = false) String sortby,
+            @RequestParam(value = "order",defaultValue ="asc",required = false) String order
     ) {
 
-        List<userDto> users = userService.getAllUsers(pagenumber,pagesize);
+        List<userDto> users = userService.getAllUsers(pagenumber,pagesize,sortby,order);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

@@ -25,5 +25,5 @@ public interface UserServices {
     List<userDto> searchUser(String keyword);
 
     // Get all users
-    List<userDto> getAllUsers(int pagenumber,int pagesize);
+    List<userDto> getAllUsers(int pagenumber,int pagesize,String sortby,String order);
 }

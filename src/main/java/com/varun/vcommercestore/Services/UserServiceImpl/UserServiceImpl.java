@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.ReadOnlyFileSystemException;
@@ -92,8 +93,14 @@ public class UserServiceImpl implements UserServices {
     }
 
     @Override
-    public List<userDto> getAllUsers(int pagenumber,int pagesize) {
-        Pageable pageable= PageRequest.of(pagenumber, pagesize);
+    public List<userDto> getAllUsers(int pagenumber,int pagesize,String sortby,String order) {
+        Sort sorted = order
+                .equalsIgnoreCase("desc") ?
+                Sort.by(sortby).descending() :
+                Sort.by(sortby).ascending();
+
+
+        Pageable pageable= PageRequest.of(pagenumber, pagesize,sorted);
         Page<User> page = userRepository.findAll(pageable);
         List<User> users = page.getContent();
         List<userDto> userDtos = users.
