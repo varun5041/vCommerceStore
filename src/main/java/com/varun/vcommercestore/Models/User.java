@@ -19,6 +19,7 @@ import jakarta.validation.constraints.Size;
 public class User {
     @Id
     private String userId;
+    @Column(unique = true,nullable = false)
     private String userName;
     @Column(nullable = false, unique = true, length = 100)
     private String userEmail;

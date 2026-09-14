@@ -9,6 +9,10 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.internal.bytebuddy.implementation.auxiliary.AuxiliaryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.ReadOnlyFileSystemException;
@@ -28,6 +32,12 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public userDto createUser(userDto userdto) {
+        if(userRepository.existsByUserEmail(userdto.getUserEmail())){
+            throw new DataIntegrityViolationException(" account with this email already exists!");
+        }
+        if (userRepository.existsByUserName(userdto.getUserName())){
+            throw new DataIntegrityViolationException("Account with Username already exists!");
+        }
         userdto.setUserId(UUID.randomUUID().toString());
         User user = dtoToEntity(userdto);
         User savedUser = userRepository.save(user);
@@ -82,8 +92,10 @@ public class UserServiceImpl implements UserServices {
     }
 
     @Override
-    public List<userDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
+    public List<userDto> getAllUsers(int pagenumber,int pagesize) {
+        Pageable pageable= PageRequest.of(pagenumber, pagesize);
+        Page<User> page = userRepository.findAll(pageable);
+        List<User> users = page.getContent();
         List<userDto> userDtos = users.
                 stream().
                 map(this::entityToDto).collect(Collectors.toList());
