@@ -1,0 +1,41 @@
+package com.varun.vcommercestore.Utils;
+
+import com.varun.vcommercestore.Models.User;
+import com.varun.vcommercestore.dtos.PageResopnse;
+import com.varun.vcommercestore.dtos.userDto;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+public class Helper {
+    @Autowired
+    private ModelMapper mapper;
+    //U is the entity
+    //V is the entity dto
+    public <U,V> PageResopnse<V> getPageResponse(Page<U> page,Class<V> type){
+        //getting all entity from page
+        List<U> entity = page.getContent();
+
+        //converting entity to dtos
+        List<V> dtolist = entity.
+                stream().
+                map(obj-> mapper.map(obj,type)).collect(Collectors.toList());
+
+        //making pageResponse
+        PageResopnse<V> userDtoPageResopnse = PageResopnse.<V>builder()
+                .content(dtolist)
+                .ppagenumber(page.getNumber())
+                .pagesize(page.getSize())
+                .totalpages(page.getTotalPages())
+                .lastpage(page.isLast())
+                .build();
+
+        return userDtoPageResopnse;
+    }
+}

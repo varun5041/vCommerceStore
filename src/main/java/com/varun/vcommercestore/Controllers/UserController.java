@@ -1,15 +1,27 @@
 package com.varun.vcommercestore.Controllers;
 
+import com.varun.vcommercestore.Exceptions.InvalidFileTypeException;
 import com.varun.vcommercestore.Models.User;
+import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.UserServices;
 import com.varun.vcommercestore.dtos.ApiResponseMessage;
+import com.varun.vcommercestore.dtos.ImageResponse;
+import com.varun.vcommercestore.dtos.PageResopnse;
 import com.varun.vcommercestore.dtos.userDto;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -18,6 +30,11 @@ public class UserController {
     @Autowired
     private UserServices userService;
 
+    @Autowired
+    private FileService fileService;
+
+    @Value("${user.profile.image.path}")
+    private String UserProfileImagePath;
     //create
     @PostMapping("/create")
     public ResponseEntity<userDto> createUser(@Valid @RequestBody userDto userdto){
@@ -38,14 +55,14 @@ public class UserController {
 
     // Get All
     @GetMapping("/getall")
-    public ResponseEntity<List<userDto>> getAllUsers(
+    public ResponseEntity<PageResopnse<userDto>> getAllUsers(
             @RequestParam(value = "pagenumber",defaultValue = "0",required = false) int pagenumber,
             @RequestParam(value = "pagesize",defaultValue = "10",required = false)int pagesize,
-            @RequestParam(value = "sortby",defaultValue = "username",required = false) String sortby,
+            @RequestParam(value = "sortby",defaultValue = "userName",required = false) String sortby,
             @RequestParam(value = "order",defaultValue ="asc",required = false) String order
-    ) {
+    ){
 
-        List<userDto> users = userService.getAllUsers(pagenumber,pagesize,sortby,order);
+        PageResopnse<userDto> users = userService.getAllUsers(pagenumber,pagesize,sortby,order);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
@@ -91,5 +108,52 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @PostMapping("/image/{userid}")
+    public ResponseEntity<ImageResponse> uploadFile(
+            @PathVariable String userid,
+            @RequestParam("profileImage")MultipartFile profileimage
+    ) throws IOException {
+        String imagename = fileService.uploadFile(profileimage,UserProfileImagePath);
+        String savedImagename = userService.saveUserProfileImage(userid,imagename);
+        ImageResponse response = ImageResponse.builder().imageName(profileimage.getOriginalFilename()).success(true).message("image saved successfully").httpStatus(HttpStatus.CREATED).build();
+        return new ResponseEntity<>(response,HttpStatus.CREATED);
+    }
 
+    @GetMapping("/image/getProfileImage/{userid}")
+    public ResponseEntity<Resource> getUserProfileImage(
+            @PathVariable String userid
+    ) throws FileNotFoundException {
+
+        String name = userService.getProfileImagename(userid);
+
+        InputStream inputStream =
+                fileService.getResource(UserProfileImagePath, name);
+
+        InputStreamResource resource =
+                new InputStreamResource(inputStream);
+
+        String extension = name.substring(name.lastIndexOf("."));
+
+        if (extension.equalsIgnoreCase(".png")) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(resource);
+        }
+
+        if (extension.equalsIgnoreCase(".jpg")
+                || extension.equalsIgnoreCase(".jpeg")) {
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        }
+
+        if (extension.equalsIgnoreCase(".gif")) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_GIF)
+                    .body(resource);
+        }
+
+        throw new InvalidFileTypeException("Unsupported image type!");
+    }
 }

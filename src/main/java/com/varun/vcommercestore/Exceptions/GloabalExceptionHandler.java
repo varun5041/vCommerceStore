@@ -57,4 +57,15 @@ public class GloabalExceptionHandler {
         response.put("httpStatus", HttpStatus.CONFLICT);
         return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(InvalidFileTypeException.class)
+    public ResponseEntity<ExceptionResponce> InvaidFileTypeExceptionHandler(InvalidFileTypeException exception){
+        logger.info("Expection Handler Invoked : Invalid File Type");
+        ExceptionResponce responce = ExceptionResponce.builder()
+                .message(exception.getMessage())
+                .status(false)
+                .httpStatus(HttpStatus.BAD_REQUEST).build();
+        return new ResponseEntity<>(responce,HttpStatus.BAD_REQUEST);
+    }
+
 }

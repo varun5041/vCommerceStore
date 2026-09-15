@@ -30,5 +30,4 @@ public class User {
     private String userAddress;
     private String userAbout;
     private String profileImage;
-
 }

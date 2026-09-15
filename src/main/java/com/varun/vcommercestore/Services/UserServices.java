@@ -1,6 +1,7 @@
 package com.varun.vcommercestore.Services;
 
 import com.varun.vcommercestore.Models.User;
+import com.varun.vcommercestore.dtos.PageResopnse;
 import com.varun.vcommercestore.dtos.userDto;
 
 import java.util.List;
@@ -25,5 +26,9 @@ public interface UserServices {
     List<userDto> searchUser(String keyword);
 
     // Get all users
-    List<userDto> getAllUsers(int pagenumber,int pagesize,String sortby,String order);
+    PageResopnse<userDto> getAllUsers(int pagenumber, int pagesize, String sortby, String order);
+
+    String saveUserProfileImage(String userid,String userImage);
+
+    String getProfileImagename(String userid);
 }

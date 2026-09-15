@@ -4,6 +4,8 @@ import com.varun.vcommercestore.Exceptions.ResourceNotFoundException;
 import com.varun.vcommercestore.Models.User;
 import com.varun.vcommercestore.Repositories.UserRepository;
 import com.varun.vcommercestore.Services.UserServices;
+import com.varun.vcommercestore.Utils.Helper;
+import com.varun.vcommercestore.dtos.PageResopnse;
 import com.varun.vcommercestore.dtos.userDto;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.internal.bytebuddy.implementation.auxiliary.AuxiliaryType;
@@ -30,6 +32,9 @@ public class UserServiceImpl implements UserServices {
 
     @Autowired
     private ModelMapper mapper;
+
+    @Autowired
+    private Helper helper;
 
     @Override
     public userDto createUser(userDto userdto) {
@@ -93,21 +98,29 @@ public class UserServiceImpl implements UserServices {
     }
 
     @Override
-    public List<userDto> getAllUsers(int pagenumber,int pagesize,String sortby,String order) {
+    public PageResopnse<userDto> getAllUsers(int pagenumber, int pagesize, String sortby, String order) {
         Sort sorted = order
                 .equalsIgnoreCase("desc") ?
                 Sort.by(sortby).descending() :
                 Sort.by(sortby).ascending();
-
-
         Pageable pageable= PageRequest.of(pagenumber, pagesize,sorted);
         Page<User> page = userRepository.findAll(pageable);
-        List<User> users = page.getContent();
-        List<userDto> userDtos = users.
-                stream().
-                map(this::entityToDto).collect(Collectors.toList());
+        return helper.getPageResponse(page,userDto.class);
+    }
 
-        return userDtos;
+    @Override
+    public String saveUserProfileImage(String userid, String userImage) {
+        User user = userRepository.findById(userid).orElseThrow(()->new ResourceNotFoundException("USER NOT FOUND!"));
+        user.setProfileImage(userImage);
+        userRepository.save(user);
+        return userImage;
+    }
+
+    @Override
+    public String getProfileImagename(String userid) {
+        User user = userRepository.findById(userid).orElseThrow(()->new ResourceNotFoundException("USER NOT FOUND!"));
+        String name = user.getProfileImage();
+        return name;
     }
 
     private userDto entityToDto(User savedUser) {
