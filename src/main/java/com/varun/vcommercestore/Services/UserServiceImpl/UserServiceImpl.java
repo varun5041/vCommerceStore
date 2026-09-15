@@ -3,6 +3,7 @@ package com.varun.vcommercestore.Services.UserServiceImpl;
 import com.varun.vcommercestore.Exceptions.ResourceNotFoundException;
 import com.varun.vcommercestore.Models.User;
 import com.varun.vcommercestore.Repositories.UserRepository;
+import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.UserServices;
 import com.varun.vcommercestore.Utils.Helper;
 import com.varun.vcommercestore.dtos.PageResopnse;
@@ -10,6 +11,7 @@ import com.varun.vcommercestore.dtos.userDto;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.internal.bytebuddy.implementation.auxiliary.AuxiliaryType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.Banner;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.nio.file.ReadOnlyFileSystemException;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +37,13 @@ public class UserServiceImpl implements UserServices {
     private ModelMapper mapper;
 
     @Autowired
+    FileService fileService;
+
+    @Autowired
     private Helper helper;
+
+    @Value("${user.profile.image.path}")
+    private String UserProfileImagePath;
 
     @Override
     public userDto createUser(userDto userdto) {
@@ -45,6 +54,9 @@ public class UserServiceImpl implements UserServices {
             throw new DataIntegrityViolationException("Account with Username already exists!");
         }
         userdto.setUserId(UUID.randomUUID().toString());
+        if(userdto.getProfileImage()==null) {
+            userdto.setProfileImage("defaultProfile.jpg");
+        }
         User user = dtoToEntity(userdto);
         User savedUser = userRepository.save(user);
         userDto newDto =  entityToDto(savedUser);
@@ -71,8 +83,19 @@ public class UserServiceImpl implements UserServices {
     }
 
     @Override
-    public void deleteUser(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("USER NOT FOUND!"));
+    public void deleteUser(String userId) throws IOException {
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("USER NOT FOUND!"));
+
+        String imageName = user.getProfileImage();
+
+        if (imageName != null && !imageName.equalsIgnoreCase("defaultProfile.jpg")) {
+            fileService.deleteFile(
+                    imageName,
+                    UserProfileImagePath
+            );
+        }
+
         userRepository.delete(user);
     }
 

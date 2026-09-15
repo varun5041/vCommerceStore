@@ -4,6 +4,7 @@ import com.varun.vcommercestore.Enums.Gender;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -68,6 +68,6 @@ public class userDto {
             message = "Invalid profile image URL"
     )
 
-    @ImageNameValid
+
     private String profileImage;
 }

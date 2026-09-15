@@ -35,6 +35,9 @@ public class UserController {
 
     @Value("${user.profile.image.path}")
     private String UserProfileImagePath;
+
+    @Value("${user.profile.delfaultimage.path}")
+    private String DefaultProfileImagePath;
     //create
     @PostMapping("/create")
     public ResponseEntity<userDto> createUser(@Valid @RequestBody userDto userdto){
@@ -69,7 +72,7 @@ public class UserController {
 
     // Delete
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<ApiResponseMessage> deleteUser(@PathVariable String userId) {
+    public ResponseEntity<ApiResponseMessage> deleteUser(@PathVariable String userId) throws IOException {
         userService.deleteUser(userId);
         ApiResponseMessage responseMessage = ApiResponseMessage.builder()
                 .message("User Deleted Successfully")
@@ -125,10 +128,13 @@ public class UserController {
     ) throws FileNotFoundException {
 
         String name = userService.getProfileImagename(userid);
+        InputStream inputStream = null;
 
-        InputStream inputStream =
-                fileService.getResource(UserProfileImagePath, name);
-
+        if(name.equalsIgnoreCase("defaultProfile.jpg")){
+            inputStream = fileService.getResource(DefaultProfileImagePath, name);
+        }else {
+            inputStream = fileService.getResource(UserProfileImagePath, name);
+        }
         InputStreamResource resource =
                 new InputStreamResource(inputStream);
 
