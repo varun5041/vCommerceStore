@@ -1,4 +1,4 @@
-package com.varun.vcommercestore.dtos;
+package com.varun.vcommercestore.dtos.ResponseEntities;
 
 import lombok.*;
 

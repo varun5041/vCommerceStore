@@ -6,7 +6,7 @@ import com.varun.vcommercestore.Repositories.UserRepository;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.UserServices;
 import com.varun.vcommercestore.Utils.Helper;
-import com.varun.vcommercestore.dtos.PageResopnse;
+import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import com.varun.vcommercestore.dtos.userDto;
 
 import org.modelmapper.ModelMapper;
@@ -162,29 +162,12 @@ public class UserServiceImpl implements UserServices {
 
         String imageName = user.getProfileImage();
 
-        if (imageName != null &&
-                !imageName.equalsIgnoreCase("defaultProfile.jpg")) {
-
-            logger.debug(
-                    "Deleting profile image '{}' for user '{}'",
-                    imageName,
-                    userId
-            );
-
-            fileService.deleteFile(
-                    imageName,
-                    userProfileImagePath
-            );
-
-            logger.info(
-                    "Profile image '{}' deleted successfully",
-                    imageName
-            );
+        if (imageName != null && !imageName.equalsIgnoreCase("defaultProfile.jpg")) {
+            logger.debug("Deleting profile image '{}' for user '{}'", imageName, userId);
+            fileService.deleteFile(imageName, userProfileImagePath);
+            logger.info("Profile image '{}' deleted successfully", imageName);
         } else {
-
-            logger.debug(
-                    "User has default/no profile image. Skipping image deletion."
-            );
+            logger.debug("User has default/no profile image. Skipping image deletion.");
         }
 
         userRepository.delete(user);

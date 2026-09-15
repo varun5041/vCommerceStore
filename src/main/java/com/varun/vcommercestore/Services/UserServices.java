@@ -1,7 +1,6 @@
 package com.varun.vcommercestore.Services;
 
-import com.varun.vcommercestore.Models.User;
-import com.varun.vcommercestore.dtos.PageResopnse;
+import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import com.varun.vcommercestore.dtos.userDto;
 
 import java.io.IOException;

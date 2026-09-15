@@ -1,11 +1,8 @@
 package com.varun.vcommercestore.Utils;
 
-import com.varun.vcommercestore.Models.User;
-import com.varun.vcommercestore.dtos.PageResopnse;
-import com.varun.vcommercestore.dtos.userDto;
+import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 

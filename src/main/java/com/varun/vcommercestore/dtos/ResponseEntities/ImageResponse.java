@@ -1,4 +1,4 @@
-package com.varun.vcommercestore.dtos;
+package com.varun.vcommercestore.dtos.ResponseEntities;
 
 import lombok.*;
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponseMessage {
+public class ImageResponse {
+    private String imageName;
     private String message;
     private HttpStatus httpStatus;
     private boolean success;
