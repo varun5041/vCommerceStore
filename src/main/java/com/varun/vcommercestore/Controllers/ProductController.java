@@ -102,6 +102,13 @@ public class ProductController {
     }
 
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDto>> searchProductsGlobal(@RequestParam("keyword") String keyword){
+        List<ProductDto> results = productServies.searchProducts(keyword);
+        return new ResponseEntity<>(results,HttpStatus.OK);
+    }
+
+
     //get all live products
     @GetMapping("/live")
     public ResponseEntity<List<ProductDto>> getAllLiveProducts(){
@@ -136,27 +143,18 @@ public class ProductController {
             @PathVariable String ProductId,
             @RequestParam(name="productimage") MultipartFile productimage
     ) throws IOException {
-
         logger.info("Received product image upload request for product: {}", ProductId);
-
         logger.debug("Product image name: {}", productimage.getOriginalFilename());
-
         String name = fileService.uploadFile(productimage,ProductImagePath);
-
         logger.info("Product image uploaded successfully for product: {}", ProductId);
-
         String savedImageName = productServies.saveProductImageName(name,ProductId);
-
         logger.info("Product image name saved successfully for product: {}", ProductId);
-
         ImageResponse response= ImageResponse.builder()
                 .imageName(productimage.getOriginalFilename())
                 .message("Product Image Saved Sucessfully")
                 .success(true).httpStatus(HttpStatus.CREATED)
                 .build();
-
         logger.info("Product image upload completed successfully for product: {}", ProductId);
-
         return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 
@@ -164,52 +162,32 @@ public class ProductController {
     public ResponseEntity<Resource> getProductImage(
             @PathVariable String ProductId
     ) throws FileNotFoundException {
-
         logger.info("Received request to get product image for product: {}", ProductId);
-
         String name = productServies.getProductImageName(ProductId);
-
         logger.debug("Product image name retrieved: {}", name);
-
         InputStream inputStream=null;
-
         if(!name.equalsIgnoreCase("defproductimage.jpg")) {
             inputStream = fileService.getResource(ProductImagePath,name);
         }else {
             inputStream = fileService.getResource(DefaultProductImagePath,name);
         }
-
         logger.debug("Product image resource loaded successfully for product: {}", ProductId);
-
         InputStreamResource resource = new InputStreamResource(inputStream);
-
         String extension = name.substring(name.lastIndexOf("."));
-
         logger.debug("Product image extension: {}", extension);
-
         if (extension.equalsIgnoreCase(".png")) {
-
             logger.info("Returning PNG product image for product: {}", ProductId);
-
             return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(resource);
         }
-
         if (extension.equalsIgnoreCase(".jpg") || extension.equalsIgnoreCase(".jpeg")) {
-
             logger.info("Returning JPEG product image for product: {}", ProductId);
-
             return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
         }
-
         if (extension.equalsIgnoreCase(".gif")) {
-
             logger.info("Returning GIF product image for product: {}", ProductId);
-
             return ResponseEntity.ok().contentType(MediaType.IMAGE_GIF).body(resource);
         }
-
         logger.warn("Unsupported product image type for product {}: {}", ProductId, extension);
-
         throw new InvalidFileTypeException("Unsupported image type!");
     }
 }

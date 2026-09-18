@@ -28,6 +28,7 @@ public interface ProductServies {
     //searchbyBrand
     List<ProductDto> searchByBrand(String brandKeyword);
     //search-global(anything)
+    List<ProductDto> searchProducts(String keyword);
 
     //images serve and upload
     String saveProductImageName(String name,String ProductId);

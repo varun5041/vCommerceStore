@@ -7,6 +7,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -47,4 +49,12 @@ public class Product {
     private String brand;
 
     private BigDecimal discountPrice;
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_categories",
+            joinColumns=@JoinColumn(name = "product_id",nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "category_id",nullable = false)
+    )
+    private Set<Category> categories = new HashSet<>();
 }

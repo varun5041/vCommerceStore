@@ -3,6 +3,7 @@ package com.varun.vcommercestore.Controllers;
 import com.varun.vcommercestore.Exceptions.InvalidFileTypeException;
 import com.varun.vcommercestore.Services.CategoryService;
 import com.varun.vcommercestore.Services.FileService;
+import com.varun.vcommercestore.dtos.ProductDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.ImageResponse;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import com.varun.vcommercestore.dtos.categoryDto;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -119,6 +121,16 @@ public class CategoryController {
         logger.info("Category fetched successfully with id: {}", categoryId);
 
         return new ResponseEntity<>(category, HttpStatus.OK);
+    }
+
+    //get all products by category
+    @GetMapping("/{categoryId}/products")
+    public ResponseEntity<List<ProductDto>> getProductsFromCategory(
+            @PathVariable String categoryId) {
+
+        List<ProductDto> products = categoryService.getProductFromCategory(categoryId);
+
+        return ResponseEntity.ok(products);
     }
 
     @PostMapping("/upload/image/{categoryid}")

@@ -1,10 +1,10 @@
 package com.varun.vcommercestore.Models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -22,4 +22,6 @@ public class Category {
     private String CategoryIcon;
     @Column(name="description",length=225)
     private String CategoryDescription;
+    @ManyToMany(mappedBy = "categories")
+    private Set<Product> products = new HashSet<>();
 }

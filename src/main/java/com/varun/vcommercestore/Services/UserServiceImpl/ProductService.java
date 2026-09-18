@@ -23,9 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,19 +47,19 @@ public class ProductService implements ProductServies {
 
     @Override
     public ProductDto createProduct(ProductDto productDto) {
-        //set id
+
         productDto.setProductid(UUID.randomUUID().toString());
-        //set date for date of creation
         LocalDateTime current = LocalDateTime.now();
         productDto.setAddedDate(current);
         productDto.setUpdateDate(current);
-        //set default image
-        if(productDto.getProductImage() == null || productDto.getProductImage().isEmpty()){
+        if (productDto.getProductImage() == null ||
+                productDto.getProductImage().isEmpty()) {
             productDto.setProductImage("defproductimage.jpg");
         }
         Product product = dtotoEntity(productDto);
-        Product savedproduct=repository.save(product);
-        return entityToDto(savedproduct);
+
+        Product savedProduct = repository.save(product);
+        return entityToDto(savedProduct);
     }
 
     @Override
@@ -80,7 +78,7 @@ public class ProductService implements ProductServies {
         product.setUpdateDate(LocalDateTime.now());
         product.setLive(productDto.isLive());
         product.setOutOfStock(productDto.isOutOfStock());
-
+        product.setCategories(helper.getCategoriesbyids(productDto.getCategories()));
         Product updatedProduct = repository.save(product);
 
         return entityToDto(updatedProduct);
@@ -111,7 +109,6 @@ public class ProductService implements ProductServies {
 
     @Override
     public ProductDto getByid(String Product) {
-
         Product product = repository.findById(Product)
                 .orElseThrow(() -> new ResourceNotFoundException("Item Not Found!"));
 
@@ -136,6 +133,18 @@ public class ProductService implements ProductServies {
         return helper.getPageResponse(page, ProductDto.class);
     }
 
+    public List<ProductDto> searchProducts(String keyword){
+        List<Product> searchResult = repository.searchProducts(keyword);
+        List<ProductDto> productDtoList = searchResult.stream()
+                .map(this::entityToDto).collect(Collectors.toList());
+        return productDtoList;
+    }
+
+    //----------------------------------------------
+    //SPECIAL FIELD WISE SEARCHING
+     //----------------------------------------------
+
+
     @Override
     public List<ProductDto> getallLiveProducts() {
         List<Product> liveProducts =repository.findByIsLiveTrue();
@@ -159,7 +168,9 @@ public class ProductService implements ProductServies {
         return foundresultsDto;
     }
 
-    //image
+    //--------------------------------------
+    //IMAGE RELATED APIS
+    //--------------------------------------
 
     @Override
     public String saveProductImageName(String name,String ProductId) {
@@ -169,6 +180,8 @@ public class ProductService implements ProductServies {
         repository.save(product);
         return name;
     }
+
+
 
     @Override
     public String getProductImageName(String ProductId) {
@@ -187,13 +200,22 @@ public class ProductService implements ProductServies {
 
         logger.debug("Converting product DTO to entity");
 
-        return mapper.map(dto,Product.class);
+        Product product = mapper.map(dto,Product.class);
+        product.setCategories(helper.getCategoriesbyids(dto.getCategories()));
+
+        return product;
     }
 
     public ProductDto entityToDto(Product product){
 
         logger.debug("Converting product entity to DTO");
 
-        return mapper.map(product, ProductDto.class);
+        ProductDto productDto = mapper.map(product, ProductDto.class);
+        productDto.setCategories(product.getCategories()
+                .stream().map(c->c.getCategoryId()).collect(Collectors.toSet()));
+
+        return productDto;
     }
+
+
 }

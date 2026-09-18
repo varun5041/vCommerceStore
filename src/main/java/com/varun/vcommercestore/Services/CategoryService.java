@@ -1,9 +1,11 @@
 package com.varun.vcommercestore.Services;
 
+import com.varun.vcommercestore.dtos.ProductDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import com.varun.vcommercestore.dtos.categoryDto;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface CategoryService {
     //create
@@ -25,5 +27,6 @@ public interface CategoryService {
 
     String getCategoryImageName(String categoryid);
 
+    List<ProductDto> getProductFromCategory(String CategoryId);
 
 }

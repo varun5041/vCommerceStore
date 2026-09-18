@@ -1,13 +1,17 @@
 package com.varun.vcommercestore.Repositories;
 
 import com.varun.vcommercestore.Enums.ProductStatus;
+import com.varun.vcommercestore.Models.Category;
 import com.varun.vcommercestore.Models.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product,String> {
@@ -41,4 +45,15 @@ public interface ProductRepository extends JpaRepository<Product,String> {
 
     // Brand filtering
     List<Product> findByBrandIgnoreCase(String brand);
+
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "JOIN p.categories c " +
+            "WHERE LOWER(p.productname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p.productDescription) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p.brand) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Product> searchProducts(@Param("keyword") String keyword);
+
+
+
 }

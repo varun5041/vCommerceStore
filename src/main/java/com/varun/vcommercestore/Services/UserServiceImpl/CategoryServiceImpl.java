@@ -2,10 +2,12 @@ package com.varun.vcommercestore.Services.UserServiceImpl;
 
 import com.varun.vcommercestore.Exceptions.ResourceNotFoundException;
 import com.varun.vcommercestore.Models.Category;
+import com.varun.vcommercestore.Models.Product;
 import com.varun.vcommercestore.Repositories.CategoryRepository;
 import com.varun.vcommercestore.Services.CategoryService;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Utils.Helper;
+import com.varun.vcommercestore.dtos.ProductDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import com.varun.vcommercestore.dtos.categoryDto;
 import org.modelmapper.ModelMapper;
@@ -20,7 +22,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -149,6 +154,18 @@ public class CategoryServiceImpl implements CategoryService{
         return name;
     }
 
+    public List<ProductDto> getProductFromCategory(String CategoryId){
+        Category category = categoryRepository.findById(CategoryId).orElseThrow(()->new ResourceNotFoundException("Category Not Found"));
+        Set<Product> allProducts = category.getProducts();
+        List<ProductDto> productDtoList = allProducts.stream()
+                .map(product->entityToDtoforProducts(product))
+                .collect(Collectors.toList());
+
+        return productDtoList;
+    }
+
+
+
 
 
 
@@ -167,6 +184,13 @@ public class CategoryServiceImpl implements CategoryService{
         logger.debug("Converting category entity to DTO");
 
         return mapper.map(category, categoryDto.class);
+    }
+
+    public ProductDto entityToDtoforProducts(Product product){
+
+        logger.debug("Converting product entity to DTO");
+
+        return mapper.map(product,ProductDto.class);
     }
 
 
