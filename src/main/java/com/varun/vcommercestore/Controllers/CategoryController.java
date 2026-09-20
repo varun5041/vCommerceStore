@@ -3,13 +3,12 @@ package com.varun.vcommercestore.Controllers;
 import com.varun.vcommercestore.Exceptions.InvalidFileTypeException;
 import com.varun.vcommercestore.Services.CategoryService;
 import com.varun.vcommercestore.Services.FileService;
-import com.varun.vcommercestore.dtos.ProductDto;
+import com.varun.vcommercestore.dtos.Requestdtos.categoryDto;
+import com.varun.vcommercestore.dtos.Responcedtos.CategoryResponseDto;
+import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.ImageResponse;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
-import com.varun.vcommercestore.dtos.categoryDto;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/category")
@@ -48,10 +46,10 @@ public class CategoryController {
 
     //create
     @PostMapping("/create")
-    public ResponseEntity<categoryDto> createCategory(@Valid @RequestBody categoryDto categoryDto){
+    public ResponseEntity<CategoryResponseDto> createCategory(@Valid @RequestBody categoryDto categoryRequest){
 
         logger.info("Received request to create category");
-        categoryDto savedCategory = categoryService.createCategory(categoryDto);
+        CategoryResponseDto savedCategory = categoryService.createCategory(categoryRequest);
 
         logger.info("Category created successfully with id: {}", savedCategory.getCategoryId());
 
@@ -61,13 +59,13 @@ public class CategoryController {
 
     //update
     @PutMapping("/update/{categoryId}")
-    public ResponseEntity<categoryDto> updateCategory(@Valid
-            @RequestBody categoryDto categoryDto,
+    public ResponseEntity<CategoryResponseDto> updateCategory(
+            @Valid @RequestBody categoryDto categoryRequest,
             @PathVariable String categoryId){
 
         logger.info("Received request to update category with id: {}", categoryId);
 
-        categoryDto updatedCategory = categoryService.updateCategory(categoryDto, categoryId);
+        CategoryResponseDto updatedCategory = categoryService.updateCategory(categoryRequest, categoryId);
 
         logger.info("Category updated successfully with id: {}", categoryId);
 
@@ -91,7 +89,7 @@ public class CategoryController {
 
     //getall
     @GetMapping("/getall")
-    public ResponseEntity<PageResopnse<categoryDto>> getAllCategories(
+    public ResponseEntity<PageResopnse<CategoryResponseDto>> getAllCategories(
             @RequestParam(value = "pagenumber",defaultValue = "0",required = false) int pagenumber,
             @RequestParam(value = "pagesize",defaultValue = "10",required = false)int pagesize,
             @RequestParam(value = "sortby",defaultValue = "title",required = false) String sortby,
@@ -101,7 +99,7 @@ public class CategoryController {
         logger.info("Received request to get all categories. Page: {}, Size: {}, SortBy: {}, Order: {}",
                 pagenumber, pagesize, sortby, order);
 
-        PageResopnse<categoryDto> categories =
+        PageResopnse<CategoryResponseDto> categories =
                 categoryService.getAllCategories(pagenumber,pagesize,sortby,order);
 
         logger.info("Categories fetched successfully");
@@ -112,11 +110,11 @@ public class CategoryController {
 
     //getsinglebyid
     @GetMapping("/{categoryId}")
-    public ResponseEntity<categoryDto> getCategoryById(@PathVariable String categoryId){
+    public ResponseEntity<CategoryResponseDto> getCategoryById(@PathVariable String categoryId){
 
         logger.info("Received request to get category with id: {}", categoryId);
 
-        categoryDto category = categoryService.getCategoryById(categoryId);
+        CategoryResponseDto category = categoryService.getCategoryById(categoryId);
 
         logger.info("Category fetched successfully with id: {}", categoryId);
 
@@ -125,10 +123,10 @@ public class CategoryController {
 
     //get all products by category
     @GetMapping("/{categoryId}/products")
-    public ResponseEntity<List<ProductDto>> getProductsFromCategory(
+    public ResponseEntity<List<ProductResponseDto>> getProductsFromCategory(
             @PathVariable String categoryId) {
 
-        List<ProductDto> products = categoryService.getProductFromCategory(categoryId);
+        List<ProductResponseDto> products = categoryService.getProductFromCategory(categoryId);
 
         return ResponseEntity.ok(products);
     }
@@ -211,9 +209,4 @@ public class CategoryController {
 
         throw new InvalidFileTypeException("Unsupported image type!");
     }
-
-
-
-
-
 }

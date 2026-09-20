@@ -1,32 +1,32 @@
 package com.varun.vcommercestore.Services;
 
-import com.varun.vcommercestore.dtos.ProductDto;
+import com.varun.vcommercestore.dtos.Requestdtos.categoryDto;
+import com.varun.vcommercestore.dtos.Responcedtos.CategoryResponseDto;
+import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
-import com.varun.vcommercestore.dtos.categoryDto;
 
 import java.io.IOException;
 import java.util.List;
 
 public interface CategoryService {
     //create
-    categoryDto createCategory(categoryDto categoryDto);
+    CategoryResponseDto createCategory(categoryDto categoryRequest);
 
     //update
-    categoryDto updateCategory(categoryDto categoryDto, String categoryId);
+    CategoryResponseDto updateCategory(categoryDto categoryRequest, String categoryId);
 
     //delete
     void deleteCategory(String categoryId) throws IOException;
 
     //getall
-    PageResopnse<categoryDto> getAllCategories(int pagenumber, int pagesize, String sortby, String order);
+    PageResopnse<CategoryResponseDto> getAllCategories(int pagenumber, int pagesize, String sortby, String order);
 
     //getsinglebyid
-    categoryDto getCategoryById(String categoryId);
+    CategoryResponseDto getCategoryById(String categoryId);
 
-    String savecategoryImageName(String name,String categoryid);
+    String savecategoryImageName(String name, String categoryid);
 
     String getCategoryImageName(String categoryid);
 
-    List<ProductDto> getProductFromCategory(String CategoryId);
-
+    List<ProductResponseDto> getProductFromCategory(String CategoryId);
 }

@@ -3,10 +3,12 @@ package com.varun.vcommercestore.Controllers;
 import com.varun.vcommercestore.Exceptions.InvalidFileTypeException;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.UserServices;
+import com.varun.vcommercestore.dtos.Requestdtos.UserRequestDto;
+import com.varun.vcommercestore.dtos.Responcedtos.UserResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.ApiResponseMessage;
 import com.varun.vcommercestore.dtos.ResponseEntities.ImageResponse;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
-import com.varun.vcommercestore.dtos.userDto;
+import com.varun.vcommercestore.dtos.UpdateRequestDto.UserUpdateRequestDto;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,37 +48,33 @@ public class UserController {
 
     //create
     @PostMapping("/create")
-    public ResponseEntity<userDto> createUser(@Valid @RequestBody userDto userdto){
+    public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto userreqdto){
 
         logger.info("Received request to create a new user");
 
-        userDto user = userService.createUser(userdto);
+        UserResponseDto userResponseDto = userService.createUser(userreqdto);
 
-        logger.info("User created successfully with id: {}", user.getUserId());
+        logger.info("User created successfully with id: {}", userResponseDto.getUserId());
 
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return new ResponseEntity<>(userResponseDto, HttpStatus.CREATED);
     }
 
 
     // Update
     @PutMapping("/update/{userId}")
-    public ResponseEntity<userDto> updateUser(
-            @Valid @RequestBody userDto userdto,
+    public ResponseEntity<UserResponseDto> updateUser(
+            @Valid @RequestBody UserUpdateRequestDto userreqdto,
             @PathVariable String userId) {
-
         logger.info("Received request to update user with id: {}", userId);
-
-        userDto updatedUser = userService.updateUser(userdto, userId);
-
+        UserResponseDto updatedUser = userService.updateUser(userreqdto, userId);
         logger.info("User updated successfully with id: {}", userId);
-
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
 
     // Get All
     @GetMapping("/getall")
-    public ResponseEntity<PageResopnse<userDto>> getAllUsers(
+    public ResponseEntity<PageResopnse<UserResponseDto>> getAllUsers(
             @RequestParam(value = "pagenumber",defaultValue = "0",required = false) int pagenumber,
             @RequestParam(value = "pagesize",defaultValue = "10",required = false)int pagesize,
             @RequestParam(value = "sortby",defaultValue = "userName",required = false) String sortby,
@@ -86,7 +84,7 @@ public class UserController {
         logger.info("Received request to get all users. Page: {}, Size: {}, SortBy: {}, Order: {}",
                 pagenumber, pagesize, sortby, order);
 
-        PageResopnse<userDto> users = userService.getAllUsers(pagenumber,pagesize,sortby,order);
+        PageResopnse<UserResponseDto> users = userService.getAllUsers(pagenumber,pagesize,sortby,order);
 
         logger.info("Users fetched successfully for page: {}", pagenumber);
 
@@ -115,11 +113,11 @@ public class UserController {
 
     // Get Single
     @GetMapping("/{userId}")
-    public ResponseEntity<userDto> getUserById(@PathVariable String userId) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable String userId) {
 
         logger.info("Received request to get user with id: {}", userId);
 
-        userDto user = userService.getUserById(userId);
+        UserResponseDto user = userService.getUserById(userId);
 
         logger.info("User fetched successfully with id: {}", userId);
 
@@ -129,33 +127,22 @@ public class UserController {
 
     // Get By Email
     @GetMapping("/email/{userEmail}")
-    public ResponseEntity<userDto> getUserByEmail(@PathVariable String userEmail) {
-
+    public ResponseEntity<UserResponseDto> getUserByEmail(@PathVariable String userEmail) {
         logger.info("Received request to get user by email: {}", userEmail);
-
-        userDto user = userService.getUserByEmail(userEmail);
-
+        UserResponseDto user = userService.getUserByEmail(userEmail);
         logger.info("User fetched successfully using email: {}", userEmail);
-
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
 
     //search
-    // Search
     @GetMapping("/search")
-    public ResponseEntity<List<userDto>> searchUser(
-            @RequestParam String keyword) {
-
+    public ResponseEntity<List<UserResponseDto>> searchUser(@RequestParam String keyword) {
         logger.info("Received request to search users with keyword: {}", keyword);
-
-        List<userDto> users = userService.searchUser(keyword);
-
+        List<UserResponseDto> users = userService.searchUser(keyword);
         logger.info("User search completed. Found {} users", users.size());
-
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
-
 
     @PostMapping("/image/{userid}")
     public ResponseEntity<ImageResponse> uploadFile(

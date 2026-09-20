@@ -3,7 +3,8 @@ package com.varun.vcommercestore.Controllers;
 import com.varun.vcommercestore.Exceptions.InvalidFileTypeException;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.ProductServies;
-import com.varun.vcommercestore.dtos.ProductDto;
+import com.varun.vcommercestore.dtos.Requestdtos.ProductRequestDto;
+import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.ImageResponse;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import jakarta.validation.Valid;
@@ -45,9 +46,9 @@ public class ProductController {
 
     //create
     @PostMapping("/create")
-    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto){
+    public ResponseEntity<ProductResponseDto> createProduct(@Valid @RequestBody ProductRequestDto productRequestDto){
         logger.info("Received request to create product");
-        ProductDto savedProduct = productServies.createProduct(productDto);
+        ProductResponseDto savedProduct = productServies.createProduct(productRequestDto);
         logger.info("Product created successfully with id: {}",savedProduct.getProductid());
         return new ResponseEntity<>(savedProduct,HttpStatus.CREATED);
     }
@@ -55,10 +56,10 @@ public class ProductController {
 
     //update
     @PutMapping("/update/{ProductId}")
-    public ResponseEntity<ProductDto> updateProduct(@Valid @RequestBody ProductDto productDto,
-                                                    @PathVariable String ProductId){
+    public ResponseEntity<ProductResponseDto> updateProduct(@Valid @RequestBody ProductRequestDto productRequestDto,
+                                                            @PathVariable String ProductId){
         logger.info("Received request to update product with id: {}",ProductId);
-        ProductDto updatedProduct = productServies.updateProdcut(productDto,ProductId);
+        ProductResponseDto updatedProduct = productServies.updateProdcut(productRequestDto,ProductId);
         logger.info("Product updated successfully with id: {}",ProductId);
         return new ResponseEntity<>(updatedProduct,HttpStatus.OK);
     }
@@ -76,9 +77,9 @@ public class ProductController {
 
     //get single product
     @GetMapping("/{ProductId}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable String ProductId){
+    public ResponseEntity<ProductResponseDto> getProductById(@PathVariable String ProductId){
         logger.info("Received request to get product with id: {}",ProductId);
-        ProductDto product = productServies.getByid(ProductId);
+        ProductResponseDto product = productServies.getByid(ProductId);
         logger.info("Product fetched successfully with id: {}",ProductId);
         return new ResponseEntity<>(product,HttpStatus.OK);
     }
@@ -86,7 +87,7 @@ public class ProductController {
 
     //get all products
     @GetMapping("/getall")
-    public ResponseEntity<PageResopnse<ProductDto>> getAllProducts(
+    public ResponseEntity<PageResopnse<ProductResponseDto>> getAllProducts(
             @RequestParam(value = "pagenumber",defaultValue = "0",required = false) int pagenumber,
             @RequestParam(value = "pagesize",defaultValue = "10",required = false) int pagesize,
             @RequestParam(value = "sortby",defaultValue = "productname",required = false) String sortby,
@@ -95,7 +96,7 @@ public class ProductController {
 
         logger.info("Received request to get all products. Page: {}, Size: {}, SortBy: {}, Order: {}",
                 pagenumber,pagesize,sortby,order);
-        PageResopnse<ProductDto> products =
+        PageResopnse<ProductResponseDto> products =
                 productServies.getAllProducts(pagenumber,pagesize,sortby,order);
         logger.info("Products fetched successfully");
         return new ResponseEntity<>(products,HttpStatus.OK);
@@ -103,17 +104,17 @@ public class ProductController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<List<ProductDto>> searchProductsGlobal(@RequestParam("keyword") String keyword){
-        List<ProductDto> results = productServies.searchProducts(keyword);
+    public ResponseEntity<List<ProductResponseDto>> searchProductsGlobal(@RequestParam("keyword") String keyword){
+        List<ProductResponseDto> results = productServies.searchProducts(keyword);
         return new ResponseEntity<>(results,HttpStatus.OK);
     }
 
 
     //get all live products
     @GetMapping("/live")
-    public ResponseEntity<List<ProductDto>> getAllLiveProducts(){
+    public ResponseEntity<List<ProductResponseDto>> getAllLiveProducts(){
         logger.info("Received request to get all live products");
-        List<ProductDto> liveProducts = productServies.getallLiveProducts();
+        List<ProductResponseDto> liveProducts = productServies.getallLiveProducts();
         logger.info("Live products fetched successfully");
         return new ResponseEntity<>(liveProducts,HttpStatus.OK);
     }
@@ -121,9 +122,9 @@ public class ProductController {
 
     //search product by name
     @GetMapping("/search/name")
-    public ResponseEntity<List<ProductDto>> searchProductByName(@RequestParam String keyword){
+    public ResponseEntity<List<ProductResponseDto>> searchProductByName(@RequestParam String keyword){
         logger.info("Received request to search product by name: {}",keyword);
-        List<ProductDto> products = productServies.searchProductByname(keyword);
+        List<ProductResponseDto> products = productServies.searchProductByname(keyword);
         logger.info("Product name search completed successfully");
         return new ResponseEntity<>(products,HttpStatus.OK);
     }
@@ -131,9 +132,9 @@ public class ProductController {
 
     //search product by brand
     @GetMapping("/search/brand")
-    public ResponseEntity<List<ProductDto>> searchByBrand(@RequestParam String brand){
+    public ResponseEntity<List<ProductResponseDto>> searchByBrand(@RequestParam String brand){
         logger.info("Received request to search product by brand: {}",brand);
-        List<ProductDto> products = productServies.searchByBrand(brand);
+        List<ProductResponseDto> products = productServies.searchByBrand(brand);
         logger.info("Brand search completed successfully");
         return new ResponseEntity<>(products,HttpStatus.OK);
     }

@@ -7,9 +7,9 @@ import com.varun.vcommercestore.Repositories.ProductRepository;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.ProductServies;
 import com.varun.vcommercestore.Utils.Helper;
-import com.varun.vcommercestore.dtos.ProductDto;
+import com.varun.vcommercestore.dtos.Requestdtos.ProductRequestDto;
+import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
-import com.varun.vcommercestore.dtos.categoryDto;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +22,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +35,7 @@ public class ProductService implements ProductServies {
 
     @Autowired
     private Helper helper;
+
     @Autowired
     private ProductRepository repository;
 
@@ -45,45 +50,60 @@ public class ProductService implements ProductServies {
 
     Logger logger = LoggerFactory.getLogger(ProductService.class);
 
-    @Override
-    public ProductDto createProduct(ProductDto productDto) {
 
-        productDto.setProductid(UUID.randomUUID().toString());
+    // =========================
+    // CREATE PRODUCT
+    // =========================
+    @Override
+    public ProductResponseDto createProduct(ProductRequestDto request) {
+
+        logger.info("Creating new product");
+
+        Product product = new Product();
+
+        // fields the server sets (client can't send these)
+        product.setProductid(UUID.randomUUID().toString());
         LocalDateTime current = LocalDateTime.now();
-        productDto.setAddedDate(current);
-        productDto.setUpdateDate(current);
-        if (productDto.getProductImage() == null ||
-                productDto.getProductImage().isEmpty()) {
-            productDto.setProductImage("defproductimage.jpg");
-        }
-        Product product = dtotoEntity(productDto);
+        product.setAddedDate(current);
+        product.setUpdateDate(current);
+        product.setProductImage("defproductimage.jpg");
+
+        // fields that come from the request
+        copyRequestToProduct(request, product);
 
         Product savedProduct = repository.save(product);
+
+        logger.info("Product created successfully with id: {}", savedProduct.getProductid());
+
         return entityToDto(savedProduct);
     }
 
+
+    // =========================
+    // UPDATE PRODUCT
+    // =========================
     @Override
-    public ProductDto updateProdcut(ProductDto productDto, String ProductId) {
+    public ProductResponseDto updateProdcut(ProductRequestDto request, String ProductId) {
+
+        logger.info("Updating product with id: {}", ProductId);
 
         Product product = repository.findById(ProductId)
                 .orElseThrow(() -> new ResourceNotFoundException("Item Not Found!"));
 
-        product.setProductname(productDto.getProductname());
-        product.setProductDescription(productDto.getProductDescription());
-        product.setPrice(productDto.getPrice());
-        product.setDiscountPercentage(productDto.getDiscountPercentage());
-        product.setDiscountPrice(productDto.getDiscountPrice());
-        product.setAvailableQuantity(productDto.getAvailableQuantity());
-        product.setProductStatus(productDto.getProductStatus());
+        copyRequestToProduct(request, product);
         product.setUpdateDate(LocalDateTime.now());
-        product.setLive(productDto.isLive());
-        product.setOutOfStock(productDto.isOutOfStock());
-        product.setCategories(helper.getCategoriesbyids(productDto.getCategories()));
+
         Product updatedProduct = repository.save(product);
+
+        logger.info("Product updated successfully with id: {}", ProductId);
 
         return entityToDto(updatedProduct);
     }
 
+
+    // =========================
+    // DELETE PRODUCT
+    // =========================
     @Override
     public void deleteProduct(String ProductId) throws IOException {
 
@@ -96,27 +116,37 @@ public class ProductService implements ProductServies {
 
         String imageName = product.getProductImage();
 
-        if(imageName != null && !imageName.isEmpty() && !imageName.equalsIgnoreCase("defproductimage.jpg")) {
+        // delete the DB row first, then the image file
+        repository.delete(product);
+
+        if (imageName != null && !imageName.isEmpty() && !imageName.equalsIgnoreCase("defproductimage.jpg")) {
             logger.info("Deleting product image: {}", imageName);
-            fileService.deleteFile(ProductImagePath,imageName);
+            // (name, path) is the correct order
+            fileService.deleteFile(imageName, ProductImagePath);
             logger.info("Product image deleted successfully: {}", imageName);
         }
-
-        repository.delete(product);
 
         logger.info("Product deleted successfully with id: {}", ProductId);
     }
 
+
+    // =========================
+    // GET PRODUCT BY ID
+    // =========================
     @Override
-    public ProductDto getByid(String Product) {
+    public ProductResponseDto getByid(String Product) {
         Product product = repository.findById(Product)
                 .orElseThrow(() -> new ResourceNotFoundException("Item Not Found!"));
 
         return entityToDto(product);
     }
 
+
+    // =========================
+    // GET ALL PRODUCTS (PAGED)
+    // =========================
     @Override
-    public PageResopnse<ProductDto> getAllProducts(
+    public PageResopnse<ProductResponseDto> getAllProducts(
             int pagenumber,
             int pagesize,
             String sortby,
@@ -130,92 +160,134 @@ public class ProductService implements ProductServies {
 
         Page<Product> page = repository.findAll(pageable);
 
-        return helper.getPageResponse(page, ProductDto.class);
+        // converted one by one so the categories come out as ids
+        List<ProductResponseDto> content = page.getContent().stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
+
+        return PageResopnse.<ProductResponseDto>builder()
+                .content(content)
+                .ppagenumber(page.getNumber())
+                .pagesize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalpages(page.getTotalPages())
+                .lastpage(page.isLast())
+                .build();
     }
 
-    public List<ProductDto> searchProducts(String keyword){
+
+    // =========================
+    // GLOBAL SEARCH
+    // =========================
+    @Override
+    public List<ProductResponseDto> searchProducts(String keyword) {
         List<Product> searchResult = repository.searchProducts(keyword);
-        List<ProductDto> productDtoList = searchResult.stream()
-                .map(this::entityToDto).collect(Collectors.toList());
-        return productDtoList;
+        return searchResult.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
     }
+
 
     //----------------------------------------------
     //SPECIAL FIELD WISE SEARCHING
-     //----------------------------------------------
-
+    //----------------------------------------------
 
     @Override
-    public List<ProductDto> getallLiveProducts() {
-        List<Product> liveProducts =repository.findByIsLiveTrue();
-        List<ProductDto> liveProductsDto = liveProducts.stream().map(product -> entityToDto(product)).collect(Collectors.toList());
-        return liveProductsDto;
+    public List<ProductResponseDto> getallLiveProducts() {
+        List<Product> liveProducts = repository.findByIsLiveTrue();
+        return liveProducts.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<ProductDto> searchProductByname(String keyword) {
+    public List<ProductResponseDto> searchProductByname(String keyword) {
         List<Product> foundResults = repository.findByProductnameContainingIgnoreCase(keyword);
-        List<ProductDto>foundresultsDto=foundResults.stream()
-                .map(foundResult ->entityToDto(foundResult)).collect(Collectors.toList());
-        return foundresultsDto;
+        return foundResults.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<ProductDto> searchByBrand(String brandKeyword) {
+    public List<ProductResponseDto> searchByBrand(String brandKeyword) {
         List<Product> foundResults = repository.findByBrandIgnoreCase(brandKeyword);
-        List<ProductDto>foundresultsDto=foundResults.stream()
-                .map(foundResult ->entityToDto(foundResult)).collect(Collectors.toList());
-        return foundresultsDto;
+        return foundResults.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
     }
+
 
     //--------------------------------------
     //IMAGE RELATED APIS
     //--------------------------------------
 
     @Override
-    public String saveProductImageName(String name,String ProductId) {
+    public String saveProductImageName(String name, String ProductId) {
         Product product = repository.findById(ProductId)
-                .orElseThrow(()->new ResourceNotFoundException("Product not Found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not Found!"));
         product.setProductImage(name);
         repository.save(product);
         return name;
     }
 
-
-
     @Override
     public String getProductImageName(String ProductId) {
         Product product = repository.findById(ProductId)
-                .orElseThrow(()->new ResourceNotFoundException("Product Does Not Exist"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product Does Not Exist"));
         String name = product.getProductImage();
 
-        if(name == null || name.isEmpty()){
-            name="defproductimage.jpg";
+        if (name == null || name.isEmpty()) {
+            name = "defproductimage.jpg";
         }
 
         return name;
     }
 
-    public Product dtotoEntity(ProductDto dto){
 
-        logger.debug("Converting product DTO to entity");
+    //--------------------------------------
+    //HELPER METHODS
+    //--------------------------------------
 
-        Product product = mapper.map(dto,Product.class);
-        product.setCategories(helper.getCategoriesbyids(dto.getCategories()));
+    // Copies the fields the client is allowed to send onto the product.
+    // Used by both create and update.
+    private void copyRequestToProduct(ProductRequestDto request, Product product) {
 
-        return product;
+        product.setProductname(request.getProductname());
+        product.setProductDescription(request.getProductDescription());
+        product.setBrand(request.getBrand());
+        product.setPrice(request.getPrice());
+        product.setDiscountPercentage(request.getDiscountPercentage());
+        product.setAvailableQuantity(request.getAvailableQuantity());
+        product.setProductStatus(request.getProductStatus());
+        product.setLive(request.isLive());
+
+        // calculated by the server, not sent by the client
+        double discountAmount = request.getPrice() * request.getDiscountPercentage() / 100;
+        product.setDiscountPrice(
+                BigDecimal.valueOf(request.getPrice() - discountAmount).setScale(2, RoundingMode.HALF_UP)
+        );
+        product.setOutOfStock(request.getAvailableQuantity() == 0);
+
+        // every category id must exist
+        Set<Category> categories = helper.getCategoriesbyids(request.getCategories());
+        if (categories.size() != request.getCategories().size()) {
+            throw new ResourceNotFoundException("One or more categories not found!");
+        }
+        product.setCategories(categories);
     }
 
-    public ProductDto entityToDto(Product product){
+    // Entity -> Response DTO (categories become a set of category ids)
+    private ProductResponseDto entityToDto(Product product) {
 
-        logger.debug("Converting product entity to DTO");
+        logger.debug("Converting product entity to response DTO");
 
-        ProductDto productDto = mapper.map(product, ProductDto.class);
-        productDto.setCategories(product.getCategories()
-                .stream().map(c->c.getCategoryId()).collect(Collectors.toSet()));
+        ProductResponseDto response = mapper.map(product, ProductResponseDto.class);
+        response.setCategories(
+                product.getCategories().stream()
+                        .map(Category::getCategoryId)
+                        .collect(Collectors.toSet())
+        );
 
-        return productDto;
+        return response;
     }
-
-
 }

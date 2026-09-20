@@ -1,32 +1,34 @@
 package com.varun.vcommercestore.Services;
 
+import com.varun.vcommercestore.dtos.Requestdtos.UserRequestDto;
+import com.varun.vcommercestore.dtos.Responcedtos.UserResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
-import com.varun.vcommercestore.dtos.userDto;
+import com.varun.vcommercestore.dtos.UpdateRequestDto.UserUpdateRequestDto;
 
 import java.io.IOException;
 import java.util.List;
 
 public interface UserServices {
     // Create
-    userDto createUser(userDto userdto);
+    UserResponseDto createUser(UserRequestDto userRequestDtodto);
 
     // Update
-    userDto updateUser(userDto userdto, String userId);
+    UserResponseDto updateUser(UserUpdateRequestDto usereqdto,String userid);
 
     // Delete
     void deleteUser(String userId) throws IOException;
 
     // Get user by ID
-    userDto getUserById(String userId);
+    UserResponseDto getUserById(String userId);
 
     //getByEmail
-    userDto getUserByEmail(String userEmail);
+    UserResponseDto getUserByEmail(String userEmail);
 
     //searchUser
-    List<userDto> searchUser(String keyword);
+    List<UserResponseDto> searchUser(String keyword);
 
     // Get all users
-    PageResopnse<userDto> getAllUsers(int pagenumber, int pagesize, String sortby, String order);
+    PageResopnse<UserResponseDto> getAllUsers(int pagenumber, int pagesize, String sortby, String order);
 
     String saveUserProfileImage(String userid,String userImage);
 

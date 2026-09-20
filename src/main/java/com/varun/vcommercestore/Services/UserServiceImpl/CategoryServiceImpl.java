@@ -7,9 +7,10 @@ import com.varun.vcommercestore.Repositories.CategoryRepository;
 import com.varun.vcommercestore.Services.CategoryService;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Utils.Helper;
-import com.varun.vcommercestore.dtos.ProductDto;
+import com.varun.vcommercestore.dtos.Requestdtos.categoryDto;
+import com.varun.vcommercestore.dtos.Responcedtos.CategoryResponseDto;
+import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
-import com.varun.vcommercestore.dtos.categoryDto;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class CategoryServiceImpl implements CategoryService{
+public class CategoryServiceImpl implements CategoryService {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
@@ -49,24 +50,33 @@ public class CategoryServiceImpl implements CategoryService{
     private String CategoryImagePath;
 
 
+    // =========================
+    // CREATE CATEGORY
+    // =========================
     @Override
-    public categoryDto createCategory(categoryDto categoryDto) {
+    public CategoryResponseDto createCategory(categoryDto categoryRequest) {
 
         logger.info("Creating new category");
-        categoryDto.setCategoryId(UUID.randomUUID().toString());
-        if(categoryDto.getCategoryIcon()==null) {
-            categoryDto.setCategoryIcon("defcaticon.png");
-        }
-        Category category = dtotoEntity(categoryDto);
-        logger.debug("Category DTO converted to entity");
+
+        Category category = dtoToEntity(categoryRequest);
+
+        // fields the server sets (client can't send these)
+        category.setCategoryId(UUID.randomUUID().toString());
+        category.setCategoryIcon("defcaticon.png");
+
         Category savedCategory = categoryRepository.save(category);
+
         logger.info("Category created successfully with id: {}", savedCategory.getCategoryId());
-        categoryDto savedcategoryDto = entityToDto(savedCategory);
-        return savedcategoryDto;
+
+        return entityToDto(savedCategory);
     }
 
+
+    // =========================
+    // UPDATE CATEGORY
+    // =========================
     @Override
-    public categoryDto updateCategory(categoryDto categoryDto, String categoryId) {
+    public CategoryResponseDto updateCategory(categoryDto categoryRequest, String categoryId) {
 
         logger.info("Updating category with id: {}", categoryId);
 
@@ -75,9 +85,10 @@ public class CategoryServiceImpl implements CategoryService{
 
         logger.debug("Category found with id: {}", categoryId);
 
-        category.setTitle(categoryDto.getTitle());
-        category.setCategoryIcon(categoryDto.getCategoryIcon());
-        category.setCategoryDescription(categoryDto.getCategoryDescription());
+        // only title and description can be updated here
+        // (the icon changes only through the image upload endpoint)
+        category.setTitle(categoryRequest.getTitle());
+        category.setCategoryDescription(categoryRequest.getCategoryDescription());
 
         Category updatedCategory = categoryRepository.save(category);
 
@@ -86,6 +97,10 @@ public class CategoryServiceImpl implements CategoryService{
         return entityToDto(updatedCategory);
     }
 
+
+    // =========================
+    // DELETE CATEGORY
+    // =========================
     @Override
     public void deleteCategory(String categoryId) throws IOException {
 
@@ -94,19 +109,26 @@ public class CategoryServiceImpl implements CategoryService{
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("CATEGORY NOT FOUND!"));
 
-        String categoryicon = category.getCategoryIcon();
-        if(categoryicon!=null && !categoryicon.equalsIgnoreCase("defcaticon.png")){
-            fileService.deleteFile(categoryicon,CategoryImagePath);
-        }
         logger.debug("Category found with id: {}", categoryId);
 
+        String categoryicon = category.getCategoryIcon();
+
+        // delete the DB row first, then the icon file
         categoryRepository.delete(category);
+
+        if (categoryicon != null && !categoryicon.equalsIgnoreCase("defcaticon.png")) {
+            fileService.deleteFile(categoryicon, CategoryImagePath);
+        }
 
         logger.info("Category deleted successfully with id: {}", categoryId);
     }
 
+
+    // =========================
+    // GET ALL CATEGORIES (PAGED)
+    // =========================
     @Override
-    public PageResopnse<categoryDto> getAllCategories(int pagenumber, int pagesize, String sortby, String order) {
+    public PageResopnse<CategoryResponseDto> getAllCategories(int pagenumber, int pagesize, String sortby, String order) {
 
         logger.info("Fetching all categories. Page: {}, Size: {}, SortBy: {}, Order: {}",
                 pagenumber, pagesize, sortby, order);
@@ -122,11 +144,15 @@ public class CategoryServiceImpl implements CategoryService{
         logger.info("Categories fetched successfully. Total categories: {}",
                 page.getTotalElements());
 
-        return helper.getPageResponse(page, categoryDto.class);
+        return helper.getPageResponse(page, CategoryResponseDto.class);
     }
 
+
+    // =========================
+    // GET CATEGORY BY ID
+    // =========================
     @Override
-    public categoryDto getCategoryById(String categoryId) {
+    public CategoryResponseDto getCategoryById(String categoryId) {
 
         logger.info("Fetching category with id: {}", categoryId);
 
@@ -138,10 +164,14 @@ public class CategoryServiceImpl implements CategoryService{
         return entityToDto(category);
     }
 
+
+    // =========================
+    // IMAGE RELATED
+    // =========================
     @Override
-    public String savecategoryImageName(String name,String categoryid) {
+    public String savecategoryImageName(String name, String categoryid) {
         Category category = categoryRepository.findById(categoryid)
-                .orElseThrow(()->new ResourceNotFoundException("Category not Found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not Found!"));
         category.setCategoryIcon(name);
         categoryRepository.save(category);
         return name;
@@ -149,49 +179,62 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public String getCategoryImageName(String categoryid) {
-        Category category = categoryRepository.findById(categoryid).orElseThrow(()->new ResourceNotFoundException("Category Does Not Exist"));
-        String name = category.getCategoryIcon();
-        return name;
+        Category category = categoryRepository.findById(categoryid)
+                .orElseThrow(() -> new ResourceNotFoundException("Category Does Not Exist"));
+        return category.getCategoryIcon();
     }
 
-    public List<ProductDto> getProductFromCategory(String CategoryId){
-        Category category = categoryRepository.findById(CategoryId).orElseThrow(()->new ResourceNotFoundException("Category Not Found"));
+
+    // =========================
+    // PRODUCTS OF A CATEGORY
+    // =========================
+    @Override
+    public List<ProductResponseDto> getProductFromCategory(String CategoryId) {
+        Category category = categoryRepository.findById(CategoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category Not Found"));
+
         Set<Product> allProducts = category.getProducts();
-        List<ProductDto> productDtoList = allProducts.stream()
-                .map(product->entityToDtoforProducts(product))
+
+        return allProducts.stream()
+                .map(this::productToResponse)
                 .collect(Collectors.toList());
-
-        return productDtoList;
     }
-
-
-
-
 
 
     //-----------------------------------------------------
     //mapper methods
     //----------------------------------------------------
-    public Category dtotoEntity(categoryDto dto){
 
-        logger.debug("Converting category DTO to entity");
+    // Request DTO -> Entity (only the two fields the client sends)
+    private Category dtoToEntity(categoryDto request) {
 
-        return mapper.map(dto,Category.class);
+        logger.debug("Converting category request DTO to entity");
+
+        Category category = new Category();
+        category.setTitle(request.getTitle());
+        category.setCategoryDescription(request.getCategoryDescription());
+        return category;
     }
 
-    public categoryDto entityToDto(Category category){
+    // Entity -> Response DTO
+    private CategoryResponseDto entityToDto(Category category) {
 
-        logger.debug("Converting category entity to DTO");
+        logger.debug("Converting category entity to response DTO");
 
-        return mapper.map(category, categoryDto.class);
+        return mapper.map(category, CategoryResponseDto.class);
     }
 
-    public ProductDto entityToDtoforProducts(Product product){
+    // Product entity -> ProductResponseDto (categories become a set of ids)
+    private ProductResponseDto productToResponse(Product product) {
 
-        logger.debug("Converting product entity to DTO");
+        logger.debug("Converting product entity to response DTO");
 
-        return mapper.map(product,ProductDto.class);
+        ProductResponseDto response = mapper.map(product, ProductResponseDto.class);
+        response.setCategories(
+                product.getCategories().stream()
+                        .map(Category::getCategoryId)
+                        .collect(Collectors.toSet())
+        );
+        return response;
     }
-
-
 }

@@ -27,9 +27,7 @@ public class Helper {
         List<U> entity = page.getContent();
 
         //converting entity to dtos
-        List<V> dtolist = entity.
-                stream().
-                map(obj-> mapper.map(obj,type)).collect(Collectors.toList());
+        List<V> dtolist = entity.stream().map(obj-> mapper.map(obj,type)).collect(Collectors.toList());
 
         //making pageResponse
         PageResopnse<V> userDtoPageResopnse = PageResopnse.<V>builder()

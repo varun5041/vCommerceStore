@@ -1,38 +1,42 @@
 package com.varun.vcommercestore.Services;
 
-import com.varun.vcommercestore.dtos.ProductDto;
+import com.varun.vcommercestore.dtos.Requestdtos.ProductRequestDto;
+import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
-import com.varun.vcommercestore.dtos.categoryDto;
-import com.varun.vcommercestore.dtos.userDto;
 
 import java.io.IOException;
 import java.util.List;
 
 public interface ProductServies {
     //create
-    ProductDto createProduct(ProductDto productDto);
+    ProductResponseDto createProduct(ProductRequestDto productRequestDto);
+
     //update
-    ProductDto updateProdcut(ProductDto productDto,String ProductId);
+    ProductResponseDto updateProdcut(ProductRequestDto productRequestDto, String ProductId);
+
     //delete
     void deleteProduct(String ProductId) throws IOException;
+
     //getbyid
-    ProductDto getByid(String Product);
+    ProductResponseDto getByid(String Product);
+
     //getallproducts
-    PageResopnse<ProductDto> getAllProducts(int pagenumber, int pagesize,String sortby,String order);
-    //filter
+    PageResopnse<ProductResponseDto> getAllProducts(int pagenumber, int pagesize, String sortby, String order);
 
     //getalllive
-    List<ProductDto> getallLiveProducts();
+    List<ProductResponseDto> getallLiveProducts();
+
     //searchbyProduct
-    List<ProductDto> searchProductByname(String keyword);
+    List<ProductResponseDto> searchProductByname(String keyword);
+
     //searchbyBrand
-    List<ProductDto> searchByBrand(String brandKeyword);
+    List<ProductResponseDto> searchByBrand(String brandKeyword);
+
     //search-global(anything)
-    List<ProductDto> searchProducts(String keyword);
+    List<ProductResponseDto> searchProducts(String keyword);
 
     //images serve and upload
-    String saveProductImageName(String name,String ProductId);
+    String saveProductImageName(String name, String ProductId);
+
     String getProductImageName(String ProductId);
-
-
 }
