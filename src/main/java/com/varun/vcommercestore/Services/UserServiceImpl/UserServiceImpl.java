@@ -30,8 +30,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserServices {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -68,7 +67,7 @@ public class UserServiceImpl implements UserServices {
             throw new DataIntegrityViolationException("Account with Username already exists!");
         }
 
-        User user=dtoToEntity(userreqdto);
+        User user = dtoToEntity(userreqdto);
 
         String userId = UUID.randomUUID().toString();
         user.setUserId(userId);
@@ -125,8 +124,8 @@ public class UserServiceImpl implements UserServices {
         });
 
         logger.debug("User found with id: {}", userId);
-        String imageName = user.getProfileImage();   // moved here, after user is found
-        userRepository.delete(user);                 // DB row first
+        String imageName = user.getProfileImage();
+        userRepository.delete(user);
 
         if (imageName != null && !imageName.equalsIgnoreCase("defaultProfile.jpg")) {
             logger.debug("Deleting profile image '{}' for user '{}'", imageName, userId);

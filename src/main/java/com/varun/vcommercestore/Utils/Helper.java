@@ -30,15 +30,16 @@ public class Helper {
         List<V> dtolist = entity.stream().map(obj-> mapper.map(obj,type)).collect(Collectors.toList());
 
         //making pageResponse
-        PageResopnse<V> userDtoPageResopnse = PageResopnse.<V>builder()
+        PageResopnse<V> DtoPageResopnse = PageResopnse.<V>builder()
                 .content(dtolist)
                 .ppagenumber(page.getNumber())
                 .pagesize(page.getSize())
-                .totalpages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
                 .lastpage(page.isLast())
+                .totalpages(page.getTotalPages())
                 .build();
 
-        return userDtoPageResopnse;
+        return DtoPageResopnse;
     }
 
     public Set<Category> getCategoriesbyids(Set<String> categoryids){

@@ -144,7 +144,10 @@ public class CategoryServiceImpl implements CategoryService {
         logger.info("Categories fetched successfully. Total categories: {}",
                 page.getTotalElements());
 
-        return helper.getPageResponse(page, CategoryResponseDto.class);
+        PageResopnse<CategoryResponseDto> response = helper.getPageResponse(page, CategoryResponseDto.class);
+
+        return response;
+
     }
 
 

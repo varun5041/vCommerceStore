@@ -99,12 +99,12 @@ public class CategoryController {
         logger.info("Received request to get all categories. Page: {}, Size: {}, SortBy: {}, Order: {}",
                 pagenumber, pagesize, sortby, order);
 
-        PageResopnse<CategoryResponseDto> categories =
+        PageResopnse<CategoryResponseDto> categoriespageresponse =
                 categoryService.getAllCategories(pagenumber,pagesize,sortby,order);
 
         logger.info("Categories fetched successfully");
 
-        return new ResponseEntity<>(categories, HttpStatus.OK);
+        return new ResponseEntity<>(categoriespageresponse, HttpStatus.OK);
     }
 
 
