@@ -8,6 +8,9 @@ public class VcommercestoreApplication{
 
 	public static void main(String[] args) {
 		SpringApplication.run(VcommercestoreApplication.class, args);
+		System.out.println("hello");
+		System.out.println("hello");
 	}
+	
 
 }
