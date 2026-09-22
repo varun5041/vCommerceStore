@@ -46,12 +46,29 @@ public interface ProductRepository extends JpaRepository<Product,String> {
     // Brand filtering
     List<Product> findByBrandIgnoreCase(String brand);
 
-    @Query("SELECT DISTINCT p FROM Product p " +
-            "JOIN p.categories c " +
-            "WHERE LOWER(p.productname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(p.productDescription) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(p.brand) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    List<Product> searchProducts(@Param("keyword") String keyword);
-    
+    @Query("""
+    SELECT DISTINCT p
+    FROM Product p
+    LEFT JOIN p.categories c
+    WHERE
+        (
+            :keyword IS NULL OR :keyword = '' OR
+            LOWER(p.productname) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(p.productDescription) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(c.CategoryDescription) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        )
+        AND (:brand IS NULL OR :brand = '' OR LOWER(p.brand) = LOWER(:brand))
+        AND (:minPrice IS NULL OR p.price >= :minPrice)
+        AND (:maxPrice IS NULL OR p.price <= :maxPrice)
+        AND (:categoryId IS NULL OR :categoryId = '' OR c.CategoryId = :categoryId)
+    """)
+    List<Product> searchAndFilterProducts(
+            @Param("keyword") String keyword,
+            @Param("brand") String brand,
+            @Param("minPrice") Double minPrice,
+            @Param("maxPrice") Double maxPrice,
+            @Param("categoryId") String categoryId
+    );
 }

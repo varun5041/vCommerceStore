@@ -33,7 +33,7 @@ public interface ProductServies {
     List<ProductResponseDto> searchByBrand(String brandKeyword);
 
     //search-global(anything)
-    List<ProductResponseDto> searchProducts(String keyword);
+    List<ProductResponseDto> searchProducts(String keyword,String brand,Double minprice,Double maxprice,String categoryid);
 
     //images serve and upload
     String saveProductImageName(String name, String ProductId);

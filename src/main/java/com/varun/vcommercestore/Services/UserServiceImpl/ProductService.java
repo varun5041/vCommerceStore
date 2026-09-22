@@ -180,8 +180,8 @@ public class ProductService implements ProductServies {
     // GLOBAL SEARCH
     // =========================
     @Override
-    public List<ProductResponseDto> searchProducts(String keyword) {
-        List<Product> searchResult = repository.searchProducts(keyword);
+    public List<ProductResponseDto> searchProducts(String keyword, String brand, Double minprice, Double maxprice, String categoryId) {
+        List<Product> searchResult = repository.searchAndFilterProducts(keyword, brand, minprice, maxprice, categoryId);
         return searchResult.stream()
                 .map(this::entityToDto)
                 .collect(Collectors.toList());

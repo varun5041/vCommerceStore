@@ -102,11 +102,17 @@ public class ProductController {
         return new ResponseEntity<>(products,HttpStatus.OK);
     }
 
-
+    //search
     @GetMapping("/search")
-    public ResponseEntity<List<ProductResponseDto>> searchProductsGlobal(@RequestParam("keyword") String keyword){
-        List<ProductResponseDto> results = productServies.searchProducts(keyword);
-        return new ResponseEntity<>(results,HttpStatus.OK);
+    public ResponseEntity<List<ProductResponseDto>> searchProductsGlobal(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "minprice", required = false) Double minprice,
+            @RequestParam(value = "maxprice", required = false) Double maxprice,
+            @RequestParam(value = "brand", required = false) String brand,
+            @RequestParam(value = "categoryId", required = false) String categoryId
+    ) {
+        List<ProductResponseDto> results = productServies.searchProducts(keyword, brand, minprice, maxprice, categoryId);
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
 
