@@ -1,10 +1,9 @@
-package com.varun.vcommercestore.Services.UserServiceImpl;
+package com.varun.vcommercestore.Services.Impls;
 
 import com.varun.vcommercestore.Exceptions.InvalidFileTypeException;
 import com.varun.vcommercestore.Services.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

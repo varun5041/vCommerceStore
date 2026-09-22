@@ -1,4 +1,4 @@
-package com.varun.vcommercestore.Services.UserServiceImpl;
+package com.varun.vcommercestore.Services.Impls;
 
 import com.varun.vcommercestore.Exceptions.ResourceNotFoundException;
 import com.varun.vcommercestore.Models.Category;
@@ -7,9 +7,11 @@ import com.varun.vcommercestore.Repositories.ProductRepository;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.ProductServies;
 import com.varun.vcommercestore.Utils.Helper;
-import com.varun.vcommercestore.dtos.Requestdtos.ProductRequestDto;
+import com.varun.vcommercestore.dtos.Requestdtos.User.ProductRequestDto;
 import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
+import com.varun.vcommercestore.dtos.UpdateRequestDto.ProductUpdateRequestDto;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductService implements ProductServies {
+public class ProductServiceImpl implements ProductServies {
 
     @Autowired
     private Helper helper;
@@ -48,7 +50,7 @@ public class ProductService implements ProductServies {
     @Value("${product.image.path}")
     private String ProductImagePath;
 
-    Logger logger = LoggerFactory.getLogger(ProductService.class);
+    Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
 
     // =========================
@@ -56,25 +58,18 @@ public class ProductService implements ProductServies {
     // =========================
     @Override
     public ProductResponseDto createProduct(ProductRequestDto request) {
-
         logger.info("Creating new product");
-
         Product product = new Product();
-
         // fields the server sets (client can't send these)
         product.setProductid(UUID.randomUUID().toString());
         LocalDateTime current = LocalDateTime.now();
         product.setAddedDate(current);
         product.setUpdateDate(current);
         product.setProductImage("defproductimage.jpg");
-
         // fields that come from the request
         copyRequestToProduct(request, product);
-
         Product savedProduct = repository.save(product);
-
         logger.info("Product created successfully with id: {}", savedProduct.getProductid());
-
         return entityToDto(savedProduct);
     }
 
@@ -83,23 +78,30 @@ public class ProductService implements ProductServies {
     // UPDATE PRODUCT
     // =========================
     @Override
-    public ProductResponseDto updateProdcut(ProductRequestDto request, String ProductId) {
-
+    @Transactional
+    public ProductResponseDto updateProdcut(ProductUpdateRequestDto request, String ProductId) {
         logger.info("Updating product with id: {}", ProductId);
-
         Product product = repository.findById(ProductId)
                 .orElseThrow(() -> new ResourceNotFoundException("Item Not Found!"));
-
-        copyRequestToProduct(request, product);
+        copyUpdateRequestToProduct(request, product);
         product.setUpdateDate(LocalDateTime.now());
-
         Product updatedProduct = repository.save(product);
-
         logger.info("Product updated successfully with id: {}", ProductId);
-
         return entityToDto(updatedProduct);
     }
 
+    // =========================
+    // UPDATE PRODUCT CATEGORY
+    // =========================
+    @Override
+    public ProductResponseDto updateProductCategory(String productid, Set<String> catids) {
+        Product product = repository.findById(productid).orElseThrow(() -> new ResourceNotFoundException("Product not found!"));
+        Set<Category> categories = helper.getCategoriesbyids(catids);
+        product.setCategories(categories);
+        product.setUpdateDate(LocalDateTime.now());
+        Product updatedProduct = repository.save(product);
+        return entityToDto(updatedProduct);
+    }
 
     // =========================
     // DELETE PRODUCT
@@ -251,29 +253,62 @@ public class ProductService implements ProductServies {
     // Copies the fields the client is allowed to send onto the product.
     // Used by both create and update.
     private void copyRequestToProduct(ProductRequestDto request, Product product) {
+        double discountAmount =
+                request.getPrice() * request.getDiscountPercentage() / 100;
 
         product.setProductname(request.getProductname());
         product.setProductDescription(request.getProductDescription());
         product.setBrand(request.getBrand());
         product.setPrice(request.getPrice());
         product.setDiscountPercentage(request.getDiscountPercentage());
-        product.setAvailableQuantity(request.getAvailableQuantity());
+        product.setQuantity(request.getQuantity());
         product.setProductStatus(request.getProductStatus());
         product.setLive(request.isLive());
 
+        product.setDiscountPrice(
+                BigDecimal.valueOf(request.getPrice() - discountAmount)
+                        .setScale(2, RoundingMode.HALF_UP)
+        );
+
+        // New product → no reservations
+        product.setReservedQuantity(0);
+
+        // quantity - reservedQuantity
+        product.setAvailableQuantity(
+                Math.max(0, product.getQuantity() - product.getReservedQuantity())
+        );
+
+        product.setOutOfStock(
+                product.getAvailableQuantity() == 0
+        );
+
+        // Every category ID must exist
+        Set<Category> categories =
+                helper.getCategoriesbyids(request.getCategories());
+
+        product.setCategories(categories);
+    }
+
+    private void copyUpdateRequestToProduct(ProductUpdateRequestDto request, Product product) {
+        product.setProductname(request.getProductname());
+        product.setProductDescription(request.getProductDescription());
+        product.setBrand(request.getBrand());
+        product.setPrice(request.getPrice());
+        product.setDiscountPercentage(request.getDiscountPercentage());
+        product.setReservedQuantity(0);
+        product.setQuantity(request.getQuantity());
+        // Recalculate available stock
+        product.setAvailableQuantity(
+                Math.max(0, product.getQuantity() - product.getReservedQuantity())
+        );
+        product.setProductStatus(request.getProductStatus());
+        product.setLive(request.isLive());
         // calculated by the server, not sent by the client
         double discountAmount = request.getPrice() * request.getDiscountPercentage() / 100;
         product.setDiscountPrice(
                 BigDecimal.valueOf(request.getPrice() - discountAmount).setScale(2, RoundingMode.HALF_UP)
         );
-        product.setOutOfStock(request.getAvailableQuantity() == 0);
-
-        // every category id must exist
-        Set<Category> categories = helper.getCategoriesbyids(request.getCategories());
-        if (categories.size() != request.getCategories().size()) {
-            throw new ResourceNotFoundException("One or more categories not found!");
-        }
-        product.setCategories(categories);
+        product.setOutOfStock(product.getAvailableQuantity() == 0);
     }
 
     // Entity -> Response DTO (categories become a set of category ids)

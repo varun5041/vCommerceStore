@@ -1,18 +1,20 @@
 package com.varun.vcommercestore.Services;
 
-import com.varun.vcommercestore.dtos.Requestdtos.ProductRequestDto;
+import com.varun.vcommercestore.dtos.Requestdtos.User.ProductRequestDto;
 import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
+import com.varun.vcommercestore.dtos.UpdateRequestDto.ProductUpdateRequestDto;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 public interface ProductServies {
     //create
     ProductResponseDto createProduct(ProductRequestDto productRequestDto);
 
     //update
-    ProductResponseDto updateProdcut(ProductRequestDto productRequestDto, String ProductId);
+    ProductResponseDto updateProdcut(ProductUpdateRequestDto productRequestDto, String ProductId);
 
     //delete
     void deleteProduct(String ProductId) throws IOException;
@@ -39,4 +41,7 @@ public interface ProductServies {
     String saveProductImageName(String name, String ProductId);
 
     String getProductImageName(String ProductId);
+
+    //updateproductcategory
+    ProductResponseDto updateProductCategory(String productid, Set<String> catids);
 }

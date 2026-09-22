@@ -31,4 +31,11 @@ public class User {
     private String userAddress;
     private String userAbout;
     private String profileImage;
+    //make a new cart when a new user is created
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(
+            name = "cart_id",
+            unique = true
+    )
+    private Cart cart;
 }

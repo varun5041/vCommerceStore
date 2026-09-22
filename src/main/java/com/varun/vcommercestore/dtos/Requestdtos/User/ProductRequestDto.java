@@ -1,13 +1,10 @@
-package com.varun.vcommercestore.dtos.Requestdtos;
+package com.varun.vcommercestore.dtos.Requestdtos.User;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.varun.vcommercestore.Enums.ProductStatus;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,8 +29,8 @@ public class ProductRequestDto {
     @PositiveOrZero(message = "Price cannot be negative")
     private double price;
 
-    @PositiveOrZero(message = "Available quantity cannot be negative")
-    private int availableQuantity;
+    @PositiveOrZero(message = "Stock quantity cannot be negative")
+    private int quantity;
 
     private ProductStatus productStatus;
 

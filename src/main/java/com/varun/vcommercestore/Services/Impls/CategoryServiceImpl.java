@@ -1,4 +1,4 @@
-package com.varun.vcommercestore.Services.UserServiceImpl;
+package com.varun.vcommercestore.Services.Impls;
 
 import com.varun.vcommercestore.Exceptions.ResourceNotFoundException;
 import com.varun.vcommercestore.Models.Category;
@@ -7,7 +7,7 @@ import com.varun.vcommercestore.Repositories.CategoryRepository;
 import com.varun.vcommercestore.Services.CategoryService;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Utils.Helper;
-import com.varun.vcommercestore.dtos.Requestdtos.categoryDto;
+import com.varun.vcommercestore.dtos.Requestdtos.Vendor.categoryDto;
 import com.varun.vcommercestore.dtos.Responcedtos.CategoryResponseDto;
 import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;

@@ -1,5 +1,6 @@
 package com.varun.vcommercestore.Utils;
 
+import com.varun.vcommercestore.Exceptions.ResourceNotFoundException;
 import com.varun.vcommercestore.Models.Category;
 import com.varun.vcommercestore.Repositories.CategoryRepository;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
@@ -44,6 +45,11 @@ public class Helper {
 
     public Set<Category> getCategoriesbyids(Set<String> categoryids){
         List<Category> categories = categoryRepository.findAllById(categoryids);
+        if (categories.size() != categoryids.size()) {
+            throw new ResourceNotFoundException(
+                    "One or more category IDs are invalid"
+            );
+        }
         return new HashSet<>(categories);
     }
 }

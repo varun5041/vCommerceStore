@@ -1,27 +1,24 @@
 package com.varun.vcommercestore.dtos.Responcedtos;
 
 import com.varun.vcommercestore.Enums.ProductStatus;
-import com.varun.vcommercestore.Models.Category;
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ProductResponseDto { //for user
+public class VendorProductResponceDto {
     private String productid;
     private String productname;
     private String productDescription;
     private double price;
     private double discountPercentage;
-    private int availableQuantity;
+    private int quantity;
     private ProductStatus productStatus;
     private LocalDateTime addedDate;
     private LocalDateTime updateDate;

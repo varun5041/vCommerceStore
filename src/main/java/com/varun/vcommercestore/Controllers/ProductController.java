@@ -3,10 +3,11 @@ package com.varun.vcommercestore.Controllers;
 import com.varun.vcommercestore.Exceptions.InvalidFileTypeException;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.ProductServies;
-import com.varun.vcommercestore.dtos.Requestdtos.ProductRequestDto;
+import com.varun.vcommercestore.dtos.Requestdtos.User.ProductRequestDto;
 import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.ImageResponse;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
+import com.varun.vcommercestore.dtos.UpdateRequestDto.ProductUpdateRequestDto;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class ProductController {
 
     //update
     @PutMapping("/update/{ProductId}")
-    public ResponseEntity<ProductResponseDto> updateProduct(@Valid @RequestBody ProductRequestDto productRequestDto,
+    public ResponseEntity<ProductResponseDto> updateProduct(@Valid @RequestBody ProductUpdateRequestDto productRequestDto,
                                                             @PathVariable String ProductId){
         logger.info("Received request to update product with id: {}",ProductId);
         ProductResponseDto updatedProduct = productServies.updateProdcut(productRequestDto,ProductId);

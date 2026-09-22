@@ -1,12 +1,13 @@
-package com.varun.vcommercestore.Services.UserServiceImpl;
+package com.varun.vcommercestore.Services.Impls;
 
 import com.varun.vcommercestore.Exceptions.ResourceNotFoundException;
+import com.varun.vcommercestore.Models.Cart;
 import com.varun.vcommercestore.Models.User;
 import com.varun.vcommercestore.Repositories.UserRepository;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.UserServices;
 import com.varun.vcommercestore.Utils.Helper;
-import com.varun.vcommercestore.dtos.Requestdtos.UserRequestDto;
+import com.varun.vcommercestore.dtos.Requestdtos.User.UserRequestDto;
 import com.varun.vcommercestore.dtos.Responcedtos.UserResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import com.varun.vcommercestore.dtos.UpdateRequestDto.UserUpdateRequestDto;
@@ -71,6 +72,11 @@ public class UserServiceImpl implements UserServices {
 
         String userId = UUID.randomUUID().toString();
         user.setUserId(userId);
+        //create a new cart for the user
+
+        Cart cart = new Cart();
+        user.setCart(cart);
+
         logger.debug("Generated user id: {}", userId);
 
         user.setProfileImage("defaultProfile.jpg");

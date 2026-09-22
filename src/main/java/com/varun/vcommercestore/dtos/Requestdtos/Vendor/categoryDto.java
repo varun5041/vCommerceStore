@@ -1,12 +1,8 @@
-package com.varun.vcommercestore.dtos.Requestdtos;
+package com.varun.vcommercestore.dtos.Requestdtos.Vendor;
 
-import com.varun.vcommercestore.Models.Product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter

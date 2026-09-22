@@ -31,6 +31,13 @@ public class Product {
 
     private double discountPercentage;
 
+    //actuall inventory (not visible to user added by the vendor)
+    private int quantity;
+
+    //backend reservations handling
+    private int reservedQuantity;
+
+    //this will only be visible to user
     private int availableQuantity;
 
     @Enumerated(EnumType.STRING)
@@ -57,4 +64,8 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "category_id",nullable = false)
     )
     private Set<Category> categories = new HashSet<>();
+
+    public int getAvailableQuantity() {
+        return Math.max(0, quantity - reservedQuantity);
+    }
 }
