@@ -75,6 +75,8 @@ public class UserServiceImpl implements UserServices {
         //create a new cart for the user
 
         Cart cart = new Cart();
+        cart.setTotalprice(0.0);
+        cart.setTotalItems(0);
         user.setCart(cart);
 
         logger.debug("Generated user id: {}", userId);

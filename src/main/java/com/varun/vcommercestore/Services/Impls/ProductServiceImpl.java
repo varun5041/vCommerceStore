@@ -295,20 +295,30 @@ public class ProductServiceImpl implements ProductServies {
         product.setBrand(request.getBrand());
         product.setPrice(request.getPrice());
         product.setDiscountPercentage(request.getDiscountPercentage());
-        product.setReservedQuantity(0);
+
         product.setQuantity(request.getQuantity());
-        // Recalculate available stock
+
         product.setAvailableQuantity(
-                Math.max(0, product.getQuantity() - product.getReservedQuantity())
+                Math.max(
+                        0,
+                        product.getQuantity() - product.getReservedQuantity()
+                )
         );
+
         product.setProductStatus(request.getProductStatus());
         product.setLive(request.isLive());
-        // calculated by the server, not sent by the client
-        double discountAmount = request.getPrice() * request.getDiscountPercentage() / 100;
+
+        double discountAmount =
+                request.getPrice() * request.getDiscountPercentage() / 100;
+
         product.setDiscountPrice(
-                BigDecimal.valueOf(request.getPrice() - discountAmount).setScale(2, RoundingMode.HALF_UP)
+                BigDecimal.valueOf(request.getPrice() - discountAmount)
+                        .setScale(2, RoundingMode.HALF_UP)
         );
-        product.setOutOfStock(product.getAvailableQuantity() == 0);
+
+        product.setOutOfStock(
+                product.getAvailableQuantity() == 0
+        );
     }
 
     // Entity -> Response DTO (categories become a set of category ids)

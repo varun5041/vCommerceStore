@@ -13,6 +13,7 @@ import java.util.Set;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ProductRequestDto {
 
     @NotBlank(message = "Product name is required")

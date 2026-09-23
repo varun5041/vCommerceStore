@@ -60,12 +60,17 @@ public class Product {
     @ManyToMany
     @JoinTable(
             name = "product_categories",
-            joinColumns=@JoinColumn(name = "product_id",nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "category_id",nullable = false)
+            joinColumns = @JoinColumn(name = "product_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "category_id", nullable = false)
     )
     private Set<Category> categories = new HashSet<>();
 
     public int getAvailableQuantity() {
         return Math.max(0, quantity - reservedQuantity);
+    }
+
+    public void setAvailableQuantity(int availableQuantity) {
+        this.availableQuantity = availableQuantity;
+        this.outOfStock = availableQuantity <= 0;
     }
 }

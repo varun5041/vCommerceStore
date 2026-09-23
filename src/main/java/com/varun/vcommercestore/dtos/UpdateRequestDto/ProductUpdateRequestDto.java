@@ -38,4 +38,6 @@ public class ProductUpdateRequestDto {
     @NotBlank(message = "Brand is required")
     @Size(min = 2, max = 50, message = "Brand must be between 2 and 50 characters")
     private String brand;
+
+
 }
