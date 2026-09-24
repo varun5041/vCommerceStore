@@ -7,7 +7,7 @@ import com.varun.vcommercestore.Repositories.UserRepository;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.UserServices;
 import com.varun.vcommercestore.Utils.Helper;
-import com.varun.vcommercestore.dtos.Requestdtos.User.UserRequestDto;
+import com.varun.vcommercestore.dtos.Requestdtos.UserRequestDto;
 import com.varun.vcommercestore.dtos.Responcedtos.UserResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import com.varun.vcommercestore.dtos.UpdateRequestDto.UserUpdateRequestDto;

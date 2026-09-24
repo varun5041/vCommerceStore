@@ -30,7 +30,7 @@ public class Cart {
     @Builder.Default
     private List<CartItems> cartItems = new ArrayList<>();
 
-    private Double totalprice;
+    private double totalprice;
 
     private int totalItems;
 }

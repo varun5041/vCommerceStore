@@ -1,4 +1,4 @@
-package com.varun.vcommercestore.dtos.Requestdtos.User;
+package com.varun.vcommercestore.dtos.Requestdtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.varun.vcommercestore.Enums.ProductStatus;

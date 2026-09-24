@@ -1,4 +1,4 @@
-package com.varun.vcommercestore.dtos.Requestdtos.User;
+package com.varun.vcommercestore.dtos.Requestdtos;
 
 import com.varun.vcommercestore.Enums.Gender;
 import jakarta.validation.constraints.Email;

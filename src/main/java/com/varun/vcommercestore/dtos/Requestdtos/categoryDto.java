@@ -1,4 +1,4 @@
-package com.varun.vcommercestore.dtos.Requestdtos.Vendor;
+package com.varun.vcommercestore.dtos.Requestdtos;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

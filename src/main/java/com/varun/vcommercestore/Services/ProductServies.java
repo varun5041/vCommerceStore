@@ -1,6 +1,6 @@
 package com.varun.vcommercestore.Services;
 
-import com.varun.vcommercestore.dtos.Requestdtos.User.ProductRequestDto;
+import com.varun.vcommercestore.dtos.Requestdtos.ProductRequestDto;
 import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
 import com.varun.vcommercestore.dtos.UpdateRequestDto.ProductUpdateRequestDto;

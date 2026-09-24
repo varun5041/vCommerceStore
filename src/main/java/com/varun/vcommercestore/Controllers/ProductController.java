@@ -3,7 +3,7 @@ package com.varun.vcommercestore.Controllers;
 import com.varun.vcommercestore.Exceptions.InvalidFileTypeException;
 import com.varun.vcommercestore.Services.FileService;
 import com.varun.vcommercestore.Services.ProductServies;
-import com.varun.vcommercestore.dtos.Requestdtos.User.ProductRequestDto;
+import com.varun.vcommercestore.dtos.Requestdtos.ProductRequestDto;
 import com.varun.vcommercestore.dtos.Responcedtos.ProductResponseDto;
 import com.varun.vcommercestore.dtos.ResponseEntities.ImageResponse;
 import com.varun.vcommercestore.dtos.ResponseEntities.PageResopnse;
