@@ -5,10 +5,11 @@ import org.apache.hc.core5.reactor.Command;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class VcommercestoreApplication{
-
 	public static void main(String[] args) {
 		SpringApplication.run(VcommercestoreApplication.class, args);
 	}

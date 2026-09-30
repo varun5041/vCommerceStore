@@ -29,6 +29,8 @@ public class Reservation {
 
     private int quantity;
 
+    private LocalDateTime expiresAt;
+
     private LocalDateTime reservedAt;
 
 }

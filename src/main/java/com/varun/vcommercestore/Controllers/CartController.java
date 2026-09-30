@@ -55,5 +55,20 @@ public class CartController {
         return new ResponseEntity<>(cart,HttpStatus.OK);
     }
 
+    @PostMapping("/checkout/{userid}")
+    public ResponseEntity<ApiResponseMessage> checkout(
+            @PathVariable String userid
+    ) {
+        cartService.checkout(userid);
+
+        ApiResponseMessage message = ApiResponseMessage.builder()
+                .message("Checkout successful. Items reserved for 10 minutes.")
+                .success(true)
+                .httpStatus(HttpStatus.OK)
+                .build();
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
+    }
+
 
 }

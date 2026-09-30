@@ -8,6 +8,7 @@ import com.varun.vcommercestore.dtos.Responcedtos.CartItemResponseDto;
 import com.varun.vcommercestore.dtos.Responcedtos.CartResponseDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private ReservationRepository reservationRepository;
 
-
     @Override
     @Transactional
     public void addtocart(String userid, String productid, int quantity) {
@@ -41,11 +41,6 @@ public class CartServiceImpl implements CartService {
         Product product = productRepository.findById(productid)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Product not found!"));
-
-        //check if entered quanntity is > available in stock
-        if (product.getAvailableQuantity() < quantity) {
-            throw new IllegalArgumentException("Insufficient stock");
-        }
 
         User user = userRepository.findById(userid)
                 .orElseThrow(() ->
@@ -63,7 +58,7 @@ public class CartServiceImpl implements CartService {
 
         // only a check, nothing is locked here
         if (product.getAvailableQuantity() < alreadyInCart + quantity) {
-            throw new IllegalArgumentException("Insufficient stock");
+            throw new IllegalArgumentException("Insufficient stock you can add max "+(product.getAvailableQuantity()-alreadyInCart));
         }
 
         if (existingItem != null) {
@@ -141,5 +136,60 @@ public class CartServiceImpl implements CartService {
         response.setTotalprice(cart.getTotalprice());
         response.setItems(items);
         return response;
+    }
+
+    @Override
+    @Transactional
+    public void checkout(String userid){
+        User user =userRepository.findById(userid).orElseThrow(()->new ResourceNotFoundException("User not found!"));
+        Cart cart = user.getCart();
+
+        if(cart.getCartItems().isEmpty()){
+            throw new IllegalArgumentException("no items in cart! add items in cart");
+        }
+
+        List<Reservation> oldReservations = reservationRepository.findByCart(cart);
+        for (Reservation r : oldReservations) {
+            releaseReservation(r);
+        }
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(10);
+
+
+        for(CartItems item : cart.getCartItems()){
+            Product product =item.getProduct();
+            if (product.getAvailableQuantity() < item.getQuantity()) {
+                throw new IllegalArgumentException("Not enough stock for " + product.getProductname());
+            }
+
+            product.setReservedQuantity(product.getReservedQuantity() + item.getQuantity());
+            product.setAvailableQuantity(product.getQuantity() - product.getReservedQuantity());
+            productRepository.save(product);
+
+            Reservation reservation = Reservation.builder()
+                    .product(product)
+                    .cart(cart)
+                    .quantity(item.getQuantity())
+                    .reservedAt(LocalDateTime.now())
+                    .expiresAt(expiry)
+                    .build();
+            reservationRepository.save(reservation);
+        }
+    }
+
+    private void releaseReservation(Reservation r){
+        Product product = r.getProduct();
+        product.setReservedQuantity(product.getReservedQuantity() - r.getQuantity());
+        product.setAvailableQuantity(product.getQuantity() - product.getReservedQuantity());
+        productRepository.save(product);
+        reservationRepository.delete(r);
+    }
+
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void releaseExpiredReservations() {
+        List<Reservation> expired = reservationRepository.findByExpiresAtBefore(LocalDateTime.now());
+        for (Reservation r : expired) {
+            releaseReservation(r);
+        }
     }
 }

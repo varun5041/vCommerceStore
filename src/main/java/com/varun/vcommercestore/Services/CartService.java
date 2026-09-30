@@ -8,4 +8,6 @@ public interface CartService {
     void removefromcart(String userid,String productid,int quantity);
 
     CartResponseDto getCart(String userid);
+
+    void checkout(String userid);
 }
